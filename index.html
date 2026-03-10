@@ -13,6 +13,28 @@
 
 
   <style>
+
+   @keyframes logoPulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.animate-logo-pulse {
+  animation: logoPulse 2s ease-in-out infinite;
+}
+   
 /* =========================
    🔥 ADAPTIVE HOME ZOOM
    ========================= */
@@ -586,32 +608,61 @@ updateSyncIndicator();
 let appReady = false;
 
    function showAppSkeleton() {
+
   const app = document.getElementById('app');
-  if (!app) return;
 
   app.innerHTML = `
-    <div class="min-h-full flex items-center justify-center">
-      <div class="text-center">
-        <div class="w-14 h-14 border-4 border-red-300 border-t-red-600 rounded-full animate-spin mx-auto mb-4"></div>
-        <p class="font-bold text-red-700">Memuat aplikasi…</p>
+    <div class="min-h-screen flex flex-col items-center justify-center gradient-primary">
+
+      <div class="flex flex-col items-center gap-6 animate-fade">
+
+        <img 
+          src="./logo pizzain apk.png"
+          alt="Logo"
+          class="w-40 drop-shadow-2xl animate-logo-pulse"
+        >
+
+        <div class="text-white font-bold text-lg tracking-wide">
+          Memuat aplikasi...
+        </div>
+
+        <div class="w-8 h-8 border-4 border-white/40 border-t-white rounded-full animate-spin"></div>
+
       </div>
+
     </div>
   `;
 }
 
 async function init() {
-  renderCurrentView();
+
+  // tampilkan splash logo
+  showAppSkeleton();
+
+  // buka IndexedDB dulu
   await initLocalDB();
 
   if (navigator.onLine) {
-    loadBackendData()
-      .then(() => renderCurrentView())
-      .catch(() => {
-        console.warn('⏳ Backend belum bisa diakses');
-      });
+
+    try {
+
+      // tunggu backend selesai
+      await loadBackendData();
+
+    } catch (err) {
+
+      console.warn('⏳ Backend belum bisa diakses');
+
+    }
+
   } else {
+
     console.log('📴 Offline mode aktif');
+
   }
+
+  // render UI final
+  renderCurrentView();
 }
 
 async function loadBackendData() {
