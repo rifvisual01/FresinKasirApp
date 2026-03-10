@@ -401,6 +401,28 @@ function initLocalDB() {
   });
 }
 
+   const savedShift = localStorage.getItem('activeShift');
+
+if (savedShift) {
+  try {
+    const s = JSON.parse(savedShift);
+
+    shiftData[s.shift] = {
+      status: 'open',
+      cashier: s.cashier,
+      startCash: s.startCash,
+      openedAt: s.openedAt,
+      sessionId: s.sessionId
+    };
+
+    currentShift = s.shift;
+    currentCashier = s.cashier;
+    currentView = s.shift;
+
+  } catch(e) {
+    console.warn('restore shift gagal');
+  }
+}
    function getActiveCashiers() {
   // PRIORITAS 1: cache runtime
   if (Array.isArray(cashiers) && cashiers.length) {
@@ -2453,7 +2475,15 @@ async function loginShift() {
       openedAt: safeISODate(new Date()),
       sessionId // 🔑 SIMPAN SESSION
     };
-
+   
+localStorage.setItem('activeShift', JSON.stringify({
+  shift,
+  cashier: cashierName,
+  startCash,
+  openedAt: safeISODate(new Date()),
+  sessionId
+}));
+   
     currentShift = shift;
     currentCashier = cashierName;
     currentView = shift;
@@ -2914,7 +2944,7 @@ shiftHistory.push({
 });
 
   const closedShift = currentShift;
-
+localStorage.removeItem('activeShift');
   // 🔥 MATIKAN SHIFT AKTIF
   currentShift = null;
   currentView = 'home';
