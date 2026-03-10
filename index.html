@@ -743,6 +743,13 @@ function renderCurrentView() {
   // SHIFT
   // =====================
   if (currentView === 'shift1' || currentView === 'shift2') {
+
+  // 🔥 pastikan shiftHistory sudah ada
+  if (!shiftHistory.length && navigator.onLine) {
+    loadBackendData().then(() => renderCurrentView());
+    return;
+  }
+
   if (currentShift && shiftData[currentShift]) {
     app.innerHTML = renderShiftScreen();
 
