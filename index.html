@@ -686,12 +686,13 @@ async function loadBackendData() {
   }
 
   cashiers = json.data.cashiers || [];
-  shiftHistory = json.data.shiftHistory || [];
+  if (navigator.onLine && json.data.shiftHistory) {
+  shiftHistory = json.data.shiftHistory;
+}
 
-  // jangan overwrite shift yang sedang aktif
-  if (!currentShift) {
-    shiftData = json.data.shiftData || shiftData;
-  }
+if (navigator.onLine && json.data.shiftData) {
+  shiftData = json.data.shiftData;
+}
 
    // 🔥 AUTO RESTORE SHIFT
 const restored = restoreOpenShift();
@@ -2890,8 +2891,21 @@ async function finalizeCloseShift(endCash) {
   // 1️⃣ update state lokal (UI-FIRST)
   // ================================
   shiftData[currentShift].status = 'closed';
-  shiftData[currentShift].endCash = endCash;
-  shiftData[currentShift].closedAt = closedAt;
+shiftData[currentShift].endCash = endCash;
+shiftData[currentShift].closedAt = closedAt;
+
+// 🔥 TAMBAHAN: update shiftHistory lokal
+shiftHistory.push({
+  tanggal: new Date().toISOString().split('T')[0],
+  shift: currentShift,
+  cashier: currentCashier || shiftData[currentShift].cashier,
+  startCash: shiftData[currentShift].startCash,
+  endCash: endCash,
+  status: 'closed',
+  openedAt: shiftData[currentShift].openedAt || null,
+  closedAt: closedAt,
+  sessionId: shiftData[currentShift].sessionId
+});
 
   const closedShift = currentShift;
 
