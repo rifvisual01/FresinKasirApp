@@ -658,35 +658,30 @@ let appReady = false;
 
 async function init() {
 
-  // tampilkan splash logo
   showAppSkeleton();
 
-  // buka IndexedDB dulu
   await initLocalDB();
 
   if (navigator.onLine) {
 
     try {
 
-      // tunggu backend selesai
+      // 1️⃣ kirim semua queue dulu
+      await processQueue();
+
+      // 2️⃣ ambil data terbaru dari backend
       await loadBackendData();
 
-    } catch (err) {
-
-      console.warn('⏳ Backend belum bisa diakses');
-
+    } catch(e){
+      console.warn('init sync gagal');
     }
-
-  } else {
-
-    console.log('📴 Offline mode aktif');
 
   }
 
-  // render UI final
+  // 3️⃣ baru render UI
   renderCurrentView();
-}
 
+}
 async function loadBackendData() {
   if (!navigator.onLine) return;
   const fd = new FormData();
