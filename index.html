@@ -1,0 +1,3344 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengeluaran Kasir</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+ const API_BASE = "https://script.google.com/macros/s/AKfycbyMrKtQT_hzr7wSodOurIJpsuwmfSCUJsyCMXxo4YAFSRh8RRGXQZdc-4VNqF9xuPH1Kw/exec";
+</script>
+  <script src="./kasir-data.js"></script>
+
+
+  <style>
+/* =========================
+   🔥 ADAPTIVE HOME ZOOM
+   ========================= */
+
+/* Desktop besar */
+@media (min-width: 1280px) {
+  .home-adaptive-zoom {
+    zoom: 1.35;
+  }
+}
+
+/* Laptop / tablet landscape */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .home-adaptive-zoom {
+    zoom: 1.25;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .home-adaptive-zoom {
+    zoom: 1.15;
+  }
+}
+
+/* Mobile → normal */
+@media (max-width: 767px) {
+  .home-adaptive-zoom {
+    zoom: 1.05;
+  }
+}
+
+/* =========================
+   📱 PORTRAIT MODE SUPPORT
+   ========================= */
+@media (orientation: portrait) {
+
+  /* Pastikan home tetap full */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Reset zoom agar tidak kepotong */
+  .home-adaptive-zoom {
+    zoom: 1 !important;
+  }
+
+  /* Grid home jadi 1 kolom */
+  .home-adaptive-zoom .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Perbesar card agar tetap terasa full */
+  .home-adaptive-zoom .card-modern {
+    padding: 2rem !important;
+  }
+
+  /* Header tidak terlalu tinggi */
+  .home-adaptive-zoom h1 {
+    font-size: 2.25rem !important;
+  }
+}
+
+/* =========================
+   📱 PORTRAIT HEADER — 3 BARIS RAPI
+   ========================= */
+@media (orientation: portrait) {
+
+  /* Header card */
+  .home-adaptive-zoom .glass-effect.card-modern {
+    padding: 1.5rem !important;
+  }
+
+  /* ======================
+     BARIS 1: ICON + JUDUL
+     ====================== */
+  .home-adaptive-zoom
+  .glass-effect.card-modern
+  .flex.items-center.justify-center.gap-4 {
+    flex-wrap: nowrap !important;
+    gap: 0.6rem !important;
+  }
+
+  .home-adaptive-zoom svg.w-12.h-12 {
+    width: 2.6rem !important;
+    height: 2.6rem !important;
+    flex-shrink: 0;
+  }
+
+  .home-adaptive-zoom h1 {
+    font-size: 1.55rem !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  /* ======================
+     BARIS 2 & 3: BADGE
+     ====================== */
+  .home-adaptive-zoom
+  .glass-effect.card-modern
+  .flex.items-center.justify-center.gap-3.flex-wrap {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 0.4rem !important;
+    margin-top: 0.6rem !important;
+  }
+
+  /* BADGE UMUM */
+  .home-adaptive-zoom
+  .glass-effect.card-modern
+  .flex.items-center.justify-center.gap-3.flex-wrap > div {
+    height: 1.7rem !important;
+    padding: 0 0.7rem !important;
+    font-size: 0.65rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+
+  /* ======================
+     BARIS 2: Pizzain Indonesia (sendiri, center)
+     ====================== */
+  .home-adaptive-zoom
+  .glass-effect.card-modern
+  .flex.items-center.justify-center.gap-3.flex-wrap > div:nth-child(1) {
+    width: 80% !important;
+    justify-content: center !important;
+  }
+
+  /* ======================
+     BARIS 3: Online + Tanggal
+     ====================== */
+  .home-adaptive-zoom
+  .glass-effect.card-modern
+  .flex.items-center.justify-center.gap-3.flex-wrap > div:nth-child(2),
+  .home-adaptive-zoom
+  .glass-effect.card-modern
+  .flex.items-center.justify-center.gap-3.flex-wrap > div:nth-child(3) {
+    width: auto;
+  }
+
+  /* Icon di dalam badge */
+  .home-adaptive-zoom
+  .glass-effect.card-modern
+  .flex.items-center.justify-center.gap-3.flex-wrap svg {
+    width: 0.7rem !important;
+    height: 0.7rem !important;
+  }
+}
+
+
+        body {
+            box-sizing: border-box;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .card-modern {
+            box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .input-modern {
+            border: 2px solid #e5e7eb;
+            font-weight: 700;
+        }
+        
+        .input-modern:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+            outline: none;
+        }
+        
+        .badge-modern {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .collapsible-content.open {
+            max-height: 5000px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.4s ease-out forwards;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full bg-red-600/50 overflow-auto">
+  <div id="app" class="min-h-full"></div>
+  <script>
+   
+        const defaultConfig = {
+            app_title: "Pengeluaran Kasir",
+            shift1_label: "Kasir Shift 1",
+            shift2_label: "Kasir Shift 2",
+            admin_label: "Laporan Admin"
+        };
+   
+       ///Variabel Global///
+        const CATEGORIES = ["Bahan Baku", "Operasional", "Staff"];
+
+        let currentView = 'home';
+   let cashiers = [];
+        let currentShift = null;
+        let currentCashier = null;
+   let isConnectedToBackend = false;
+        let expenses = [];
+   let shiftHistory = [];
+        let shiftData = {
+            shift1: { status: 'available', startCash: 0, endCash: 0, cashier: null },
+            shift2: { status: 'available', startCash: 0, endCash: 0, cashier: null }
+        };
+        let selectedPeriodStart = null;
+        let selectedPeriodEnd = null;
+        let searchQuery = '';
+        let chartInstance = null;
+        let chartVisibleData = { 'Bahan Baku': true, 'Operasional': true, 'Staff': true };
+   let isProcessingQueue = false;
+   let adminDataReady = false;
+let isSyncing = false;        
+let db;
+
+function normalizeExpenses() {
+  expenses = expenses.map(e => {
+    let raw = e.createdAt || e.timestamp;
+    let iso = null;
+
+    if (typeof raw === 'string') {
+      let v = raw.trim();
+
+      // "YYYY-MM-DD HH:mm:ss" → ISO UTC
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(v)) {
+        v = v.replace(' ', 'T') + 'Z';
+      }
+
+      // "YYYY-MM-DDTHH:mm:ss" → paksa UTC
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(v)) {
+        v = v + 'Z';
+      }
+
+      const d = new Date(v);
+      if (!isNaN(d.getTime())) {
+        iso = d.toISOString();
+      }
+    }
+
+    // number timestamp
+    if (!iso && typeof raw === 'number') {
+      const d = new Date(raw);
+      if (!isNaN(d.getTime())) {
+        iso = d.toISOString();
+      }
+    }
+
+    // fallback terakhir
+    if (!iso) {
+      iso = new Date().toISOString();
+    }
+
+    return {
+      ...e,
+      createdAt: iso,
+      timestamp: iso   // 🔑 INI KUNCI UTAMA
+    };
+  });
+}
+
+
+
+
+
+   function getActiveCashiers() {
+  if (Array.isArray(window.LOCAL_CASHIERS)) {
+    return window.LOCAL_CASHIERS.filter(c => c.active);
+  }
+  return [];
+}
+
+function initLocalDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("kasirDB", 1);
+
+    request.onupgradeneeded = e => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("queue")) {
+        db.createObjectStore("queue", { keyPath: "id" });
+      }
+
+     if (!db.objectStoreNames.contains('users')) {
+  db.createObjectStore('users', { keyPath: 'name' });
+}
+    };
+
+    request.onsuccess = e => {
+      db = e.target.result;
+      resolve();
+    };
+
+    request.onerror = () => reject("DB gagal dibuka");
+  });
+}
+
+   function getActiveCashiers() {
+  // PRIORITAS 1: cache runtime
+  if (Array.isArray(cashiers) && cashiers.length) {
+    return cashiers;
+  }
+
+  // PRIORITAS 2: LOCAL_CASHIERS
+  if (Array.isArray(window.LOCAL_CASHIERS)) {
+    return window.LOCAL_CASHIERS.filter(c => c.active);
+  }
+
+  return [];
+}
+
+   function verifyPinOffline(name, pin) {
+  const list = getActiveCashiers();
+
+  return list.some(u =>
+    u.name === name &&
+    String(u.pin) === String(pin)
+  );
+}
+
+function getUserByPin(name, pin) {
+  const list = getActiveCashiers();
+  return list.find(u =>
+    u.name === name &&
+    String(u.pin) === String(pin)
+  ) || null;
+}
+
+function saveToQueue(data) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(["queue"], "readwrite");
+    const store = tx.objectStore("queue");
+
+    store.put(data);
+
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+
+async function processQueue() {
+  if (!navigator.onLine) return;
+  if (!db) return;
+  if (isProcessingQueue) return;
+
+  isProcessingQueue = true;
+ isSyncing = true;
+updateSyncIndicator();
+
+  try {
+    const tx = db.transaction(['queue'], 'readonly');
+    const store = tx.objectStore('queue');
+
+    const items = await new Promise((resolve, reject) => {
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+
+    if (!items.length) return;
+
+    // FIFO
+    items.sort((a, b) => {
+      const ta = Number(a.id.split('-').pop()) || 0;
+      const tb = Number(b.id.split('-').pop()) || 0;
+      return ta - tb;
+    });
+
+    console.log('🔄 Sinkronisasi queue:', items.length);
+
+    for (const item of items) {
+      try {
+        const fd = new FormData();
+        Object.entries(item.payload).forEach(([k, v]) => {
+          fd.append(k, v);
+        });
+        fd.append('__sync', '1');
+
+        await fetch(API_BASE, {
+          method: 'POST',
+          body: fd
+        });
+
+        // hapus setelah terkirim
+        await new Promise((resolve, reject) => {
+          const txDel = db.transaction(['queue'], 'readwrite');
+          txDel.objectStore('queue').delete(item.id);
+          txDel.oncomplete = resolve;
+          txDel.onerror = () => reject(txDel.error);
+        });
+
+      } catch (err) {
+        console.warn('⏳ Gagal kirim item:', item.id);
+        break; // stop, tunggu online berikutnya
+      }
+    }
+
+  } catch (err) {
+    console.error('❌ Error processQueue:', err);
+  } finally {
+    isProcessingQueue = false;
+    isSyncing = false;
+    updateSyncIndicator();
+  }
+}
+
+async function checkRealConnection() {
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 4000);
+
+    const fd = new FormData();
+    fd.append('action', 'ping'); // backend bebas abaikan
+
+    const res = await fetch(API_BASE, {
+      method: 'POST',
+      body: fd,
+      cache: 'no-store',
+      signal: controller.signal
+    });
+
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+
+
+// 🔥 SATU-SATUNYA PEMANGGIL
+window.addEventListener("online", processQueue);
+
+async function updateSyncIndicator() {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+
+  const online = await checkRealConnection();
+
+  if (!online) {
+    el.innerHTML = `
+      <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+      <span>Offline</span>
+    `;
+    el.className =
+      'flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-full font-bold';
+    return;
+  }
+
+  if (isSyncing) {
+    el.innerHTML = `
+      <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.3"/>
+        <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" fill="none"/>
+      </svg>
+      <span>Menyinkronkan</span>
+    `;
+    el.className =
+      'flex items-center gap-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full font-bold';
+    return;
+  }
+
+  el.innerHTML = `
+    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+    <span>Online</span>
+  `;
+  el.className =
+    'flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full font-bold';
+}
+
+
+
+setInterval(updateSyncIndicator, 5000);
+updateSyncIndicator();
+
+window.addEventListener('online', updateSyncIndicator);
+window.addEventListener('offline', updateSyncIndicator);
+updateSyncIndicator();
+
+
+
+       function formatRupiah(value) {
+            if (!value) return '';
+            const number = value.toString().replace(/[^0-9]/g, '');
+            return number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function parseRupiah(value) {
+            return parseInt(value.replace(/\./g, '')) || 0;
+        }
+
+   function safeISODate(value) {
+  if (!value) return null;
+
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return null;
+
+  return d.toISOString();
+}
+
+   
+let appReady = false;
+
+   function showAppSkeleton() {
+  const app = document.getElementById('app');
+  if (!app) return;
+
+  app.innerHTML = `
+    <div class="min-h-full flex items-center justify-center">
+      <div class="text-center">
+        <div class="w-14 h-14 border-4 border-red-300 border-t-red-600 rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="font-bold text-red-700">Memuat aplikasi…</p>
+      </div>
+    </div>
+  `;
+}
+
+async function init() {
+  renderCurrentView();
+  await initLocalDB();
+
+  if (navigator.onLine) {
+    loadBackendData()
+      .then(() => renderCurrentView())
+      .catch(() => {
+        console.warn('⏳ Backend belum bisa diakses');
+      });
+  } else {
+    console.log('📴 Offline mode aktif');
+  }
+}
+
+async function loadBackendData() {
+  if (!navigator.onLine) return;
+  const fd = new FormData();
+  fd.append('action', 'getData');
+
+  try {
+    const res = await fetch(API_BASE, {
+      method: 'POST',
+      body: fd
+    });
+
+    const json = await res.json();
+
+    if (json.success) {
+
+  // 🔒 JANGAN TIMPA expenses SAAT MODE ADMIN
+  if (currentView !== 'admin') {
+    expenses = json.data.expenses || [];
+  }
+
+  cashiers = json.data.cashiers || [];
+  shiftHistory = json.data.shiftHistory || [];
+
+  // jangan overwrite shift yang sedang aktif
+  if (!currentShift) {
+    shiftData = json.data.shiftData || shiftData;
+  }
+
+  renderCurrentView(); // update UI tanpa reload
+}
+  } catch (err) {
+    console.error('Backend load failed', err);
+  }
+}
+
+   function getLastShift(date, shift) {
+  return shiftHistory
+    .filter(s => {
+      const d = new Date(s.tanggal);
+      const localDate =
+        d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2,'0') + '-' +
+        String(d.getDate()).padStart(2,'0');
+
+      return (
+        localDate === date &&
+        s.shift === shift &&
+        s.status === 'closed'
+      );
+    })
+    .sort((a,b)=> new Date(b.closedAt) - new Date(a.closedAt))[0] || null;
+}
+
+
+function renderCurrentView() {
+  const app = document.getElementById('app');
+
+  // =====================
+  // HOME
+  // =====================
+  if (currentView === 'home') {
+    app.innerHTML = renderHomeScreen();
+    return;
+  }
+
+  // =====================
+  // SHIFT
+  // =====================
+  if (currentView === 'shift1' || currentView === 'shift2') {
+  if (currentShift && shiftData[currentShift]) {
+    app.innerHTML = renderShiftScreen();
+
+    requestAnimationFrame(() => {
+      initExpenseSuggestion();
+    });
+
+    return;
+  }
+
+    currentView = 'home';
+    app.innerHTML = renderHomeScreen();
+    return;
+  }
+
+  // =====================
+  // ADMIN (FINAL – STABIL)
+  // =====================
+ if (currentView === 'admin') {
+  // 1️⃣ render awal (UI langsung tampil)
+  app.innerHTML = renderAdminScreen();
+requestAnimationFrame(() => {
+  initExpenseSuggestion();
+});
+
+  if (!adminDataReady) {
+
+    // ===============================
+    // 🔒 OFFLINE MODE → JANGAN FETCH
+    // ===============================
+    if (!navigator.onLine) {
+      normalizeExpenses();
+      adminDataReady = true;
+
+      // 🔥 grafik hanya muncul kalau multi-day
+      const todayISO = safeISODate(new Date())?.split('T')[0];
+      const startDate = selectedPeriodStart || todayISO;
+      const endDate = selectedPeriodEnd || todayISO;
+
+      if (startDate && endDate && startDate !== endDate) {
+        requestAnimationFrame(() => {
+          createChart();
+        });
+      }
+
+      return;
+    }
+
+    // ===============================
+    // 🌐 ONLINE MODE → FETCH NORMAL
+    // ===============================
+    Promise.all([
+      loadAllExpensesForAdmin(),
+      loadBackendData()
+    ])
+      .then(() => {
+        normalizeExpenses();
+        adminDataReady = true;
+
+        // 2️⃣ render ulang admin screen SETELAH data siap
+        app.innerHTML = renderAdminScreen();
+
+        // 3️⃣ trigger grafik HANYA jika multi-day
+        const todayISO = safeISODate(new Date())?.split('T')[0];
+        const startDate = selectedPeriodStart || todayISO;
+        const endDate = selectedPeriodEnd || todayISO;
+
+        if (startDate && endDate && startDate !== endDate) {
+          requestAnimationFrame(() => {
+            createChart();
+          });
+        }
+      })
+      .catch(() => {
+        // fallback aman (misal koneksi putus mendadak)
+        normalizeExpenses();
+        adminDataReady = true;
+      });
+  }
+
+  return;
+}
+}
+        function renderHomeScreen() {
+            const config = window.elementSdk?.config || defaultConfig;
+            const appTitle = config.app_title || defaultConfig.app_title;
+            const shift1Label = config.shift1_label || defaultConfig.shift1_label;
+            const shift2Label = config.shift2_label || defaultConfig.shift2_label;
+            const adminLabel = config.admin_label || defaultConfig.admin_label;
+            
+           const today = safeISODate(new Date())?.split('T')[0];
+
+const shift1Expenses = expenses.filter(e =>
+  e.shift === 'shift1' &&
+  e.timestamp &&
+  e.timestamp.startsWith(today)
+);
+
+const shift2Expenses = expenses.filter(e =>
+  e.shift === 'shift2' &&
+  e.timestamp &&
+  e.timestamp.startsWith(today)
+);
+
+const shift1Count = shift1Expenses.length;
+const shift2Count = shift2Expenses.length;
+
+            
+            const shift1Status = shiftData.shift1.status;
+            const shift2Status = shiftData.shift2.status;
+            
+            const shift1Closed = shift1Status === 'closed';
+            const shift2Closed = shift2Status === 'closed';
+            
+            return `
+               <div class="min-h-full flex justify-center p-10">
+                    <div class="w-full max-w-4xl animate-slide-in home-adaptive-zoom">
+                        <div class="glass-effect card-modern rounded-3xl p-6 mb-6 relative overflow-hidden" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
+                            <div class="absolute top-0 right-0 w-96 h-96 bg-red-700 opacity-20 rounded-full -mr-48 -mt-48"></div>
+                            <div class="absolute bottom-0 left-0 w-64 h-64 bg-red-900 opacity-10 rounded-full -ml-32 -mb-32"></div>
+                            <div class="relative">
+                                <div class="flex items-center justify-center gap-4 mb-4">
+                                    <svg class="w-12 h-12 text-white flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <div class="text-center">
+                                        <h1 class="text-4xl md:text-5xl font-black text-white drop-shadow-lg">
+                                            ${appTitle}
+                                        </h1>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-center gap-3 flex-wrap">
+                                    <div class="inline-flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full backdrop-blur-sm border border-white border-opacity-30">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                        </svg>
+                                        <p class="text-base text-white font-bold">Pizzain Indonesia</p>
+                                    </div>
+                                    <div id="syncStatus"
+     class="flex items-center gap-2 text-white text-sm font-semibold bg-white bg-opacity-10 px-4 py-2 rounded-full backdrop-blur-sm">
+  <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+  <span>Online</span>
+</div>
+
+                                    <div class="text-white text-sm font-semibold bg-white bg-opacity-10 px-4 py-2 rounded-full backdrop-blur-sm">
+                                        ${new Date().toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <button onclick="selectShift('shift1')" class="glass-effect card-modern rounded-3xl p-8 text-left group hover:shadow-2xl transition-all">
+                                <div class="flex items-start justify-between mb-6">
+                                    <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                        </svg>
+                                    </div>
+                                    ${shift1Closed ? `
+                                        <span class="badge-modern bg-gray-200 text-gray-700">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                            </svg>
+                                            Ditutup
+                                        </span>
+                                    ` : `
+                                        <span class="badge-modern bg-green-100 text-green-700">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            ${shift1Status === 'open' ? 'Aktif' : 'Tersedia'}
+                                        </span>
+                                    `}
+                                </div>
+                                <h3 class="text-3xl font-black text-gray-800 mb-2">${shift1Label}</h3>
+                                <p class="text-base text-gray-500 mb-6 font-medium">13.00 - 18.30 WIB</p>
+                                <div class="flex items-center justify-between pt-4 border-t-2 border-gray-100">
+                                    <span class="text-sm font-bold text-gray-600">Transaksi</span>
+                                    <span class="text-2xl font-black text-red-600">${shift1Count}</span>
+                                </div>
+                            </button>
+                            
+                            <button onclick="selectShift('shift2')" class="glass-effect card-modern rounded-3xl p-8 text-left group">
+                                <div class="flex items-start justify-between mb-6">
+                                    <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                                        </svg>
+                                    </div>
+                                    ${shift2Closed ? `
+                                        <span class="badge-modern bg-gray-200 text-gray-700">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                            </svg>
+                                            Ditutup
+                                        </span>
+                                    ` : `
+                                        <span class="badge-modern bg-green-100 text-green-700">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            ${shift2Status === 'open' ? 'Aktif' : 'Tersedia'}
+                                        </span>
+                                    `}
+                                </div>
+                                <h3 class="text-3xl font-black text-gray-800 mb-2">${shift2Label}</h3>
+                                <p class="text-base text-gray-500 mb-6 font-medium">18.30 - 23.00 WIB</p>
+                                <div class="flex items-center justify-between pt-4 border-t-2 border-gray-100">
+                                    <span class="text-sm font-bold text-gray-600">Transaksi</span>
+                                    <span class="text-2xl font-black text-amber-600">${shift2Count}</span>
+                                </div>
+                            </button>
+                            
+                            <button onclick="showAdminPinDialog()" class="glass-effect card-modern rounded-3xl p-8 text-left group">
+                                <div class="flex items-start justify-between mb-6">
+                                    <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="badge-modern bg-blue-100 text-blue-700">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                                        </svg>
+                                        PIN
+                                    </span>
+                                </div>
+                                <h3 class="text-3xl font-black text-gray-800 mb-2">${adminLabel}</h3>
+                                <p class="text-base text-gray-500 mb-6 font-medium">Laporan & Statistik</p>
+                                <div class="flex items-center justify-between pt-4 border-t-2 border-gray-100">
+                                    <span class="text-sm font-bold text-gray-600">Akses</span>
+                                    <span class="text-base font-black text-red-600">Admin</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        function renderShiftScreen() {
+         normalizeExpenses();
+            const config = window.elementSdk?.config || defaultConfig;
+            const shiftLabel = currentShift === 'shift1' ? (config.shift1_label || defaultConfig.shift1_label) : (config.shift2_label || defaultConfig.shift2_label);
+            const shiftInfo = shiftData[currentShift];
+            
+            if (shiftInfo.status === 'available') {
+                return renderShiftLogin();
+            }
+            
+            const today = safeISODate(new Date())?.split('T')[0];
+
+const shiftExpenses = expenses.filter(e =>
+  e.sessionId === shiftData[currentShift]?.sessionId &&
+  e.createdAt
+);
+
+            const totalExpense = shiftExpenses.reduce((sum, e) => sum + e.amount, 0);
+ const prevShiftExpenses = currentShift === 'shift2'
+  ? expenses.filter(e => {
+      if (e.shift !== 'shift1') return false;
+      if (!e.createdAt) return false;
+
+      return e.createdAt.startsWith(today);
+    })
+  : [];
+
+
+            
+            return `
+                <div class="min-h-full p-6">
+                    <div class="max-w-6xl mx-auto">
+                        <div class="gradient-primary card-modern rounded-3xl p-6 mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center gap-4">
+                                    <h2 class="text-3xl font-black text-white">${shiftLabel}</h2>
+                                    <span class="badge-modern bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                        👤 ${currentCashier || shiftInfo.cashier}
+                                    </span>
+                                    <span class="badge-modern bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                        🕐 ${shiftInfo.openedAt 
+    ? new Date(shiftInfo.openedAt).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'}) 
+    : '--:--'}
+
+                                    </span>
+                                </div>
+                                <button onclick="closeShift()" class="bg-white text-red-600 hover:bg-gray-100 px-6 py-3 rounded-xl font-bold shadow-lg transition-all">
+                                    Tutup Shift
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-red-700 rounded-xl p-6 text-white text-center">
+                                    <p class="text-sm md:text-base font-bold mb-2">💰 Kas Awal</p>
+                                    <p class="text-2xl md:text-3xl lg:text-4xl font-black">Rp ${shiftInfo.startCash.toLocaleString('id-ID')}</p>
+                                </div>
+                                <div class="bg-red-700 rounded-xl p-6 text-white text-center">
+                                    <p class="text-sm md:text-base font-bold mb-2">📊 Pengeluaran</p>
+                                    <p class="text-2xl md:text-3xl lg:text-4xl font-black">Rp ${totalExpense.toLocaleString('id-ID')}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-effect card-modern rounded-3xl p-8 mb-6">
+                            <h3 class="text-2xl font-black text-gray-800 mb-6">➕ Tambah Pengeluaran</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Nama Pengeluaran</label>
+                                    <input type="text" id="expenseName" placeholder="Cth: Air RO, Gas" class="input-modern w-full rounded-xl px-4 py-3">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Nominal</label>
+                                    <div class="relative">
+                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-600">Rp</span>
+                                        <input type="text" id="expenseAmount" placeholder="0" oninput="formatCurrencyInput(this)" class="input-modern w-full rounded-xl pl-12 pr-4 py-3">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Kategori</label>
+                                    <select id="expenseCategory" class="input-modern w-full rounded-xl px-4 py-3">
+                                        <option value="">Pilih kategori</option>
+                                        ${CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="addExpense()" class="gradient-primary text-white w-full py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all">
+                                ➕ Tambah Pengeluaran
+                            </button>
+                        </div>
+                        
+                        <div class="glass-effect card-modern rounded-3xl p-8 mb-6">
+                            <h3 class="text-2xl font-black text-gray-800 mb-6">📋 Pengeluaran ${shiftLabel}</h3>
+                            ${shiftExpenses.length === 0 ? `
+                                <div class="text-center py-12">
+                                    <p class="text-lg font-semibold text-gray-400">Belum ada pengeluaran</p>
+                                </div>
+                            ` : `
+                                <div class="space-y-3">
+                                    ${shiftExpenses.map(exp => `
+                                        <div data-expense-id="${exp.id}" class="bg-white rounded-xl p-4 border border-gray-200">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <div class="flex items-center gap-3 flex-1">
+                                                    <span class="text-base font-bold text-gray-500">${new Date(exp.createdAt).toLocaleTimeString('id-ID', {
+  hour: '2-digit',
+  minute: '2-digit'
+})
+}</span>
+                                                    <span class="badge-modern bg-red-100 text-red-700">${exp.category}</span>
+                                                    <p class="font-bold text-lg text-gray-800">${exp.expense_name}</p>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    <p class="text-xl font-black text-red-600">Rp ${exp.amount.toLocaleString('id-ID')}</p>
+                                                    <button onclick="deleteExpense('${exp.id}')" class="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg">
+                                                        <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `}
+                        </div>
+                        
+                        ${prevShiftExpenses.length > 0 ? `
+                        <div class="glass-effect card-modern rounded-3xl p-8">
+                            <h3 class="text-2xl font-black text-gray-800 mb-6">👁️ Riwayat Shift 1 (Hanya Lihat)</h3>
+                            <div class="space-y-3">
+                                ${prevShiftExpenses.map(exp => `
+                                    <div class="bg-white rounded-xl p-4 border border-gray-200">
+                                        <div class="flex items-center justify-between gap-4">
+                                            <div class="flex items-center gap-3 flex-1">
+                                                <span class="text-base font-bold text-gray-500">${new Date(exp.timestamp).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})}</span>
+                                                <span class="badge-modern bg-red-100 text-red-700">${exp.category}</span>
+                                                <p class="font-bold text-lg text-gray-800">${exp.expense_name}</p>
+                                            </div>
+                                            <p class="text-xl font-black text-red-600">Rp ${exp.amount.toLocaleString('id-ID')}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderShiftLogin() {
+            const config = window.elementSdk?.config || defaultConfig;
+            const shiftLabel = currentShift === 'shift1' ? (config.shift1_label || defaultConfig.shift1_label) : (config.shift2_label || defaultConfig.shift2_label);
+            
+            return `
+                <div class="min-h-full flex items-center justify-center p-6">
+                    <div class="w-full max-w-lg glass-effect card-modern rounded-3xl p-8 animate-slide-in">
+                        <button onclick="backToHome()" class="mb-6 text-base font-bold flex items-center gap-2 text-red-600 hover:text-red-700">
+                            ← Kembali
+                        </button>
+                        
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-3xl font-black text-gray-800 mb-2">${shiftLabel}</h2>
+                            <p class="text-gray-500 font-medium">Silakan login untuk memulai shift</p>
+                        </div>
+                        
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Kasir</label>
+<select id="cashierSelect" class="input-modern w-full rounded-xl px-4 py-3">
+  <option value="">Pilih Kasir</option>
+
+  ${window.LOCAL_CASHIERS
+    .filter(u => u.active)
+    .map(u => `
+      <option value="${u.name}">${u.name}</option>
+    `).join('')}
+</select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">PIN</label>
+                                <input type="password" id="cashierPin" placeholder="Masukkan PIN Kasir" class="input-modern w-full rounded-xl px-4 py-3">
+                            </div>
+                            
+                            ${currentShift === 'shift2' && shiftData.shift1.endCash > 0 ? `
+                            <div class="gradient-primary rounded-2xl p-5 text-white">
+                                <p class="text-sm font-bold opacity-90 mb-1">Kas Akhir Shift 1</p>
+                                <p class="text-3xl font-black mb-3">Rp ${shiftData.shift1.endCash.toLocaleString('id-ID')}</p>
+                                <button onclick="useShift1EndCash()" class="w-full bg-white text-red-600 py-3 rounded-xl font-bold hover:bg-gray-50">
+                                    Gunakan Kas Akhir Shift 1
+                                </button>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Atau Masukkan Kas Awal Manual</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-600">Rp</span>
+                                    <input type="text" id="startCash" placeholder="0" oninput="formatCurrencyInput(this)" class="input-modern w-full rounded-xl pl-12 pr-4 py-3">
+                                </div>
+                            </div>
+                            ` : `
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Kas Awal</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-600">Rp</span>
+                                    <input type="text" id="startCash" placeholder="0" oninput="formatCurrencyInput(this)" class="input-modern w-full rounded-xl pl-12 pr-4 py-3">
+                                </div>
+                            </div>
+                            `}
+                            
+                            <button
+  id="startShiftBtn"
+  onclick="loginShift()"
+  class="gradient-primary text-white w-full py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+>
+  Mulai Shift
+</button>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+   async function loadAllExpensesForAdmin() {
+  if (!navigator.onLine) return;
+  try {
+    const fd = new FormData();
+    fd.append('action', 'getAllExpenses');
+
+    const res = await fetch(API_BASE, {
+      method: 'POST',
+      body: fd
+    });
+
+    const json = await res.json();
+    if (!json.success) return;
+
+    expenses = (json.data || []).map(e => ({
+      ...e,
+      createdAt: e.createdAt || e.timestamp || null
+    }));
+
+  } catch (err) {
+    console.error('❌ Gagal load expenses admin', err);
+  }
+}
+
+function renderAdminScreen() {
+  const config = window.elementSdk?.config || defaultConfig;
+
+  const today = safeISODate(new Date())?.split('T')[0];
+  const startDate = selectedPeriodStart || today;
+  const endDate = selectedPeriodEnd || today;
+
+  const isMultiDay = startDate !== endDate;
+ const isTodayOnly = startDate === today && endDate === today;
+
+
+  // ===============================
+  // FILTER EXPENSES (GLOBAL)
+  // ===============================
+  const filteredExpenses = expenses.filter(exp => {
+    const dateSource = exp.createdAt || exp.timestamp;
+    const expDate = safeISODate(dateSource)?.split('T')[0];
+    if (!expDate) return false;
+
+    const matchesPeriod = expDate >= startDate && expDate <= endDate;
+    const matchesSearch =
+      !searchQuery ||
+      (exp.expense_name || '')
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+    return matchesPeriod && matchesSearch;
+  });
+
+  // ===============================
+  // PISAH PER SHIFT
+  // ===============================
+  const shift1Expenses = filteredExpenses.filter(e => e.shift === 'shift1');
+  const shift2Expenses = filteredExpenses.filter(e => e.shift === 'shift2');
+
+  // 🔑 ADMIN: HANYA INPUT HARI INI (BUKAN LAPORAN)
+  const adminExpenses = filteredExpenses.filter(e => {
+    if (e.shift !== 'admin') return false;
+
+    // ❌ jangan tampil di multi-day
+    if (isMultiDay) return false;
+
+    // ✅ hanya hari ini
+    const expDate = safeISODate(e.createdAt || e.timestamp)?.split('T')[0];
+    return expDate === today;
+  });
+
+  // ===============================
+  // TOTAL
+  // ===============================
+  const totalShift1 = shift1Expenses.reduce((s, e) => s + e.amount, 0);
+  const totalShift2 = shift2Expenses.reduce((s, e) => s + e.amount, 0);
+  const totalAdmin = filteredExpenses
+    .filter(e => e.shift === 'admin')
+    .reduce((s, e) => s + e.amount, 0);
+
+  const totalPengeluaran = totalShift1 + totalShift2 + totalAdmin;
+
+  // ===============================
+  // GROUP BY DATE (LAPORAN HARIAN)
+  // ===============================
+  const expensesByDate = {};
+  filteredExpenses.forEach(exp => {
+    const dateSource = exp.createdAt || exp.timestamp;
+    const dateKey = safeISODate(dateSource)?.split('T')[0];
+    if (!dateKey) return;
+
+    if (!expensesByDate[dateKey]) expensesByDate[dateKey] = [];
+    expensesByDate[dateKey].push(exp);
+  });
+
+  const sortedDates = Object.keys(expensesByDate).sort(
+    (a, b) => new Date(b) - new Date(a)
+  );
+
+  // ===============================
+  // GROUP BY CATEGORY (SUMMARY)
+  // ===============================
+  const categoryTotals = CATEGORIES.map(cat => {
+    const total = filteredExpenses
+      .filter(e => e.category === cat)
+      .reduce((sum, e) => sum + e.amount, 0);
+    return { category: cat, total };
+  });
+
+  return `
+                <div class="glass-effect card-modern rounded-3xl p-6 mb-6">
+
+  <!-- BARIS 1 : JUDUL -->
+  <div class="flex items-start gap-3 mb-4">
+    <span class="text-3xl">📊</span>
+    <div>
+      <h2 class="text-3xl font-black text-gray-800 leading-tight">
+        Laporan Admin
+      </h2>
+      <p class="text-sm font-semibold text-gray-600">
+        Ringkasan & Laporan Pengeluaran
+      </p>
+    </div>
+  </div>
+
+  <button
+  onclick="logoutAdmin()"
+  class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition-all"
+>
+  Logout & Save
+</button>
+
+
+</div>
+
+                        
+                        <div class="glass-effect card-modern rounded-3xl p-8 mb-6">
+                            <h3 class="text-2xl font-black text-gray-800 mb-6">➕ Pengeluaran Admin</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Nama Pengeluaran</label>
+                                    <input type="text" id="expenseName" placeholder="listrik" class="input-modern w-full rounded-xl px-4 py-3">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Nominal</label>
+                                    <div class="relative">
+                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-600">Rp</span>
+                                        <input type="text" id="expenseAmount" placeholder="0" oninput="formatCurrencyInput(this)" class="input-modern w-full rounded-xl pl-12 pr-4 py-3">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Kategori</label>
+                                    <select id="expenseCategory" class="input-modern w-full rounded-xl px-4 py-3">
+                                        <option value="">Pilih Kategori</option>
+                                        ${CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="addExpense()" class="gradient-primary text-white w-full py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all">
+                                ➕ Tambah Pengeluaran
+                            </button>
+                           ${isTodayOnly && adminExpenses.length > 0 ? `
+  <div class="mt-4 space-y-2">
+    ${adminExpenses.map(exp => `
+      <div data-expense-id="${exp.id}" <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+  <div class="flex items-start justify-between gap-3">
+
+    <!-- KIRI -->
+    <div class="flex flex-col gap-0.5 text-sm">
+      <div class="flex items-center gap-2 text-xs text-gray-500">
+        <span>
+          ${new Date(exp.createdAt || exp.timestamp).toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </span>
+        <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold text-[10px]">
+          ${exp.category}
+        </span>
+      </div>
+
+      <div class="text-sm font-medium text-gray-800">
+        ${exp.expense_name}
+      </div>
+    </div>
+
+    <!-- KANAN -->
+    <div class="flex flex-col items-end gap-1 shrink-0">
+      <span class="text-sm font-bold text-blue-600 whitespace-nowrap">
+        Rp ${exp.amount.toLocaleString('id-ID')}
+      </span>
+      <button
+        onclick="deleteExpense('${exp.id}')"
+        class="w-7 h-7 flex items-center justify-center rounded-md bg-red-50 text-red-600"
+      >
+        ✕
+      </button>
+    </div>
+
+  </div>
+</div>
+
+    `).join('')}
+  </div>
+` : ''}
+</div>
+</div>
+                        
+                        <div class="glass-effect card-modern rounded-3xl p-8 mb-6">
+  <h3 class="text-2xl font-black text-gray-800 mb-6">🔍 Filter Laporan</h3>
+
+  <!-- BARIS 1: DARI & SAMPAI (SELALU 1 BARIS) -->
+  <div class="grid grid-cols-2 gap-4 mb-4">
+    <div>
+      <label class="block text-sm font-bold text-gray-700 mb-2">Dari</label>
+      <input
+        type="date"
+        id="startDate"
+        value="${startDate}"
+        class="input-modern w-full rounded-xl px-4 py-3"
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-bold text-gray-700 mb-2">Sampai</label>
+      <input
+        type="date"
+        id="endDate"
+        value="${endDate}"
+        class="input-modern w-full rounded-xl px-4 py-3"
+      />
+    </div>
+  </div>
+
+  <!-- BARIS 2: CARI (FULL WIDTH) -->
+  <div class="mb-4">
+    <input
+      type="text"
+      id="searchInput"
+      value="${searchQuery}"
+      placeholder="Cari Pengeluaran"
+      class="input-modern w-full rounded-xl px-4 py-3"
+    />
+  </div>
+
+  <button
+    onclick="applyFilters()"
+    class="gradient-primary text-white w-full py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+  >
+    Terapkan Filter
+  </button>
+</div>
+
+
+                        
+                        ${!isMultiDay ? `
+<div class="px-4 md:px-6 mb-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+
+    <div class="gradient-primary rounded-2xl p-6 text-white">
+      <p class="text-sm opacity-90 mb-2 font-bold flex items-center justify-center gap-2">
+        📊 Total Shift 1
+      </p>
+      <p class="text-3xl font-black">
+        Rp ${totalShift1.toLocaleString('id-ID')}
+      </p>
+    </div>
+
+    <div class="gradient-primary rounded-2xl p-6 text-white">
+      <p class="text-sm opacity-90 mb-2 font-bold flex items-center justify-center gap-2">
+        📊 Total Shift 2
+      </p>
+      <p class="text-3xl font-black">
+        Rp ${totalShift2.toLocaleString('id-ID')}
+      </p>
+    </div>
+
+    <div class="gradient-primary rounded-2xl p-6 text-white">
+      <p class="text-sm opacity-90 mb-2 font-bold flex items-center justify-center gap-2">
+        📊 Total Admin
+      </p>
+      <p class="text-3xl font-black">
+        Rp ${totalAdmin.toLocaleString('id-ID')}
+      </p>
+    </div>
+
+    <div class="bg-red-900 rounded-2xl p-6 text-white">
+      <p class="text-sm opacity-90 mb-2 font-bold flex items-center justify-center gap-2">
+        💸 Total Pengeluaran
+      </p>
+      <p class="text-3xl font-black">
+        Rp ${totalPengeluaran.toLocaleString('id-ID')}
+      </p>
+    </div>
+
+  </div>
+</div>
+
+
+` : `
+
+                        <div class="glass-effect card-modern rounded-3xl p-8 mb-6">
+                            <h3 class="text-2xl font-black text-gray-800 mb-6">📊 Grafik Pengeluaran</h3>
+                            <div class="mb-6 flex gap-3 flex-wrap">
+                                <button onclick="toggleChartData('Bahan Baku')" id="chart-toggle-Bahan Baku" class="px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-red-600 to-red-700 text-white">
+                                    🥘 Bahan Baku
+                                </button>
+                                <button onclick="toggleChartData('Operasional')" id="chart-toggle-Operasional" class="px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-amber-600 to-amber-700 text-white">
+                                    ⚙️ Operasional
+                                </button>
+                                <button onclick="toggleChartData('Staff')" id="chart-toggle-Staff" class="px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                                    👥 Staff
+                                </button>
+                            </div>
+                            <div class="relative bg-white rounded-2xl p-6 shadow-inner" style="height: 450px;">
+                                <canvas id="expenseChart"></canvas>
+                            </div>
+                        </div>
+                        `}
+                        
+                        ${isMultiDay ? `
+                        <div class="glass-effect card-modern rounded-3xl p-8 mb-6">
+                            <h3 class="text-2xl font-black text-gray-800 mb-6">📅 Pengeluaran Harian</h3>
+                            <div class="space-y-3">
+                                ${sortedDates.map(dateKey => {
+                                    const dateExpenses = expensesByDate[dateKey];
+                                    const dateTotal = dateExpenses.reduce((sum, e) => sum + e.amount, 0);
+                                    
+                                    // Group by shift for this date
+                                    const shift1Items = dateExpenses.filter(e => e.shift === 'shift1');
+                                    const shift2Items = dateExpenses.filter(e => e.shift === 'shift2');
+                                    const adminItems = dateExpenses.filter(e => e.shift === 'admin');
+                                    
+                                    return `
+                                        <div>
+                                           <div>
+  <button onclick="toggleCategory('date-${dateKey}')"
+    class="w-full gradient-primary text-white rounded-2xl px-4 py-3 flex items-center justify-between hover:shadow-lg transition-all">
+
+    <!-- KIRI -->
+    <div class="flex flex-col gap-1 text-left">
+      <!-- TANGGAL -->
+      <p class="text-xs font-medium opacity-90 leading-tight">
+        ${new Date(dateKey).toLocaleDateString('id-ID', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        })}
+      </p>
+
+      <!-- TOTAL -->
+      <p class="text-lg font-bold leading-tight">
+        Rp ${dateTotal.toLocaleString('id-ID')}
+      </p>
+
+      <!-- JUMLAH TRANSAKSI -->
+      <p class="text-xs opacity-90">
+        ${dateExpenses.length} transaksi
+      </p>
+    </div>
+
+    <!-- KANAN (ICON) -->
+    <div class="flex items-center">
+      <svg id="icon-date-${dateKey}"
+        class="w-5 h-5 transition-transform opacity-90"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19 9l-7 7-7-7"/>
+      </svg>
+    </div>
+
+  </button>
+</div>
+                                               
+                                            </button>
+                                            <div id="detail-date-${dateKey}" class="collapsible-content">
+                                                <div class="mt-3 space-y-4">
+                                                  ${shift1Items.length > 0 ? `
+<div>
+${(() => {
+  const s1 = getLastShift(dateKey, 'shift1');
+
+  return `
+    <div class="rounded-xl p-4 mb-4 bg-red-300 border border-red-300">
+
+      <!-- BARIS 1 : SHIFT + IDENTITAS -->
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xl font-black text-red-700">
+          Shift 1
+        </span>
+        <span class="text-sm font-semibold text-gray-600">
+          👤 ${s1?.cashier || '-'} • 🕒 ${
+            s1?.openedAt
+              ? new Date(s1.openedAt).toLocaleTimeString('id-ID', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : '-'
+          }
+        </span>
+      </div>
+
+      <!-- BARIS 2 : INFO KAS -->
+      <div class="flex items-center justify-between text-sm font-semibold text-gray-700">
+        <span>📥 Rp ${(s1?.startCash || 0).toLocaleString('id-ID')}</span>
+        <span>📤 Rp ${(s1?.endCash || 0).toLocaleString('id-ID')}</span>
+      </div>
+
+    </div>
+  `;
+})()}
+
+    <div class="space-y-2">
+      ${shift1Items.map(exp => `
+        <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+  <div class="flex items-start justify-between gap-3">
+
+    <!-- KIRI -->
+    <div class="flex flex-col gap-1 flex-1 min-w-0">
+      <div class="flex items-center gap-2 text-xs text-gray-500 font-semibold">
+        <span>
+          ${new Date(exp.timestamp).toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </span>
+
+        <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px] font-bold">
+          ${exp.category}
+        </span>
+      </div>
+
+      <p class="text-sm font-semibold text-gray-800 leading-snug break-words">
+        ${exp.expense_name}
+      </p>
+    </div>
+
+    <!-- KANAN -->
+    <p class="text-sm font-bold text-purple-600 whitespace-nowrap shrink-0">
+      Rp ${exp.amount.toLocaleString('id-ID')}
+    </p>
+
+  </div>
+</div>
+      `).join('')}
+    </div>
+</div>
+` : ''}
+${shift2Items.length > 0 ? `
+<div>
+${(() => {
+  const s2 = getLastShift(dateKey, 'shift2');
+
+  return `
+    <div class="rounded-xl p-4 mb-4 bg-amber-300 border-red-300">
+
+      <!-- BARIS 1 : SHIFT + IDENTITAS -->
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xl font-black text-amber-700">
+          Shift 2
+        </span>
+        <span class="text-sm font-semibold text-gray-600">
+          👤 ${s2?.cashier || '-'} • 🕒 ${
+            s2?.openedAt
+              ? new Date(s2.openedAt).toLocaleTimeString('id-ID', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : '-'
+          }
+        </span>
+      </div>
+
+      <!-- BARIS 2 : INFO KAS -->
+      <div class="flex items-center justify-between text-sm font-semibold text-gray-700">
+        <span>📥 Rp ${(s2?.startCash || 0).toLocaleString('id-ID')}</span>
+        <span>📤 Rp ${(s2?.endCash || 0).toLocaleString('id-ID')}</span>
+      </div>
+
+    </div>
+  `;
+})()}
+
+
+    <div class="space-y-2">
+      ${shift2Items.map(exp => `
+        <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+  <div class="flex items-start justify-between gap-3">
+
+    <!-- KIRI -->
+    <div class="flex flex-col gap-1 flex-1 min-w-0">
+      <div class="flex items-center gap-2 text-xs text-gray-500 font-semibold">
+        <span>
+          ${new Date(exp.timestamp).toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </span>
+
+        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold">
+          ${exp.category}
+        </span>
+      </div>
+
+      <p class="text-sm font-semibold text-gray-800 leading-snug break-words">
+        ${exp.expense_name}
+      </p>
+    </div>
+
+    <!-- KANAN -->
+    <p class="text-sm font-bold text-pink-600 whitespace-nowrap shrink-0">
+      Rp ${exp.amount.toLocaleString('id-ID')}
+    </p>
+
+  </div>
+</div>
+      `).join('')}
+    </div>
+</div>
+` : ''}
+
+                                                    
+                                                   ${adminItems.length > 0 ? `
+  <div class="mb-4">
+
+    <!-- HEADER ADMIN -->
+    <div class="rounded-xl p-4 mb-3 bg-blue-300 border border-red-300">
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-black text-red-800 tracking-tight">
+          Admin
+        </span>
+        <span class="text-sm font-semibold text-red-900/80">
+          📋 Admin
+        </span>
+      </div>
+    </div>
+
+    <!-- ITEM ADMIN -->
+    <div class="space-y-2">
+      ${adminItems.map(exp => `
+        <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+          <div class="flex items-start justify-between gap-3">
+
+            <!-- KIRI -->
+            <div class="flex flex-col gap-1 flex-1 min-w-0">
+              <div class="flex items-center gap-2 text-xs text-gray-500 font-semibold">
+                <span>
+                  ${new Date(exp.timestamp).toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+
+                <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px] font-bold">
+                  ${exp.category}
+                </span>
+              </div>
+
+              <p class="text-sm font-semibold text-gray-800 leading-snug break-words">
+                ${exp.expense_name}
+              </p>
+            </div>
+
+            <!-- KANAN -->
+            <p class="text-sm font-bold text-purple-600 whitespace-nowrap shrink-0">
+              Rp ${exp.amount.toLocaleString('id-ID')}
+            </p>
+
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+  </div>
+` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                         <div class="glass-effect card-modern rounded-3xl p-8">
+                            <h3 class="text-2xl font-black text-gray-800 mb-6">🏷️ Kategori Pengeluaran</h3>
+                            <div class="space-y-3">
+                                ${categoryTotals.map(cat => {
+                                    const categoryExpenses = filteredExpenses.filter(e => e.category === cat.category);
+const categoryByDate = {};
+
+categoryExpenses.forEach(exp => {
+  const dateSource = exp.createdAt || exp.timestamp;
+  const dateKey = safeISODate(dateSource)?.split('T')[0];
+  if (!dateKey) return;
+
+  if (!categoryByDate[dateKey]) categoryByDate[dateKey] = [];
+  categoryByDate[dateKey].push(exp);
+                                    });
+                                    const sortedCategoryDates = Object.keys(categoryByDate).sort((a, b) => new Date(b) - new Date(a));
+                                    
+                                    return `
+                                        <div>
+                                            <button onclick="toggleCategory('cat-${cat.category}')"
+  class="w-full gradient-primary text-white rounded-2xl px-4 py-3 flex items-center justify-between hover:shadow-lg transition-all">
+
+  <!-- KIRI -->
+  <div class="flex flex-col gap-1 text-left">
+    <!-- NAMA KATEGORI -->
+    <p class="text-xs font-medium opacity-90 leading-tight">
+      ${cat.category}
+    </p>
+
+    <!-- TOTAL -->
+    <p class="text-lg font-bold leading-tight">
+      Rp ${cat.total.toLocaleString('id-ID')}
+    </p>
+  </div>
+
+  <!-- ICON -->
+  <svg id="icon-cat-${cat.category}"
+    class="w-5 h-5 transition-transform opacity-90"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.5"
+    viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+  </svg>
+</button>
+
+                       
+                                            <div id="detail-cat-${cat.category}" class="collapsible-content">
+                                                <div class="mt-3 space-y-3">
+                                                    ${sortedCategoryDates.map(dateKey => {
+                                                        const dateExpenses = categoryByDate[dateKey];
+                                                        const dateTotal = dateExpenses.reduce((sum, e) => sum + e.amount, 0);
+                                                        return `
+                                                            <div>
+                                                              <button onclick="toggleCategory('cat-${cat.category}-${dateKey}')"
+  class="w-full rounded-xl px-4 py-3 flex items-center justify-between
+         bg-red-500/30 text-red-900
+         hover:bg-red-500/40 transition-all">
+
+
+  <!-- KIRI -->
+  <div class="flex flex-col gap-1 text-left">
+    <!-- TANGGAL -->
+    <p class="text-xs font-medium leading-tight opacity-90">
+      ${new Date(dateKey).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      })}
+    </p>
+
+    <!-- TOTAL -->
+    <p class="text-base font-bold leading-tight">
+      Rp ${dateTotal.toLocaleString('id-ID')}
+    </p>
+  </div>
+
+  <!-- ICON -->
+  <svg id="icon-cat-${cat.category}-${dateKey}"
+    class="w-4 h-4 transition-transform opacity-80"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.5"
+    viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+  </svg>
+</button>
+
+                                                                <div id="detail-cat-${cat.category}-${dateKey}" class="collapsible-content">
+                                                                    <div class="mt-2 space-y-2">
+                                                                        ${dateExpenses.map(exp => `
+                                                                            <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+  <div class="flex items-start justify-between gap-3">
+
+    <!-- KIRI -->
+    <div class="flex flex-col gap-1 min-w-0">
+      <div class="flex items-center gap-2 text-xs text-gray-500">
+        <span class="font-semibold shrink-0">
+          ${new Date(exp.timestamp).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}
+        </span>
+
+        <span class="px-2 py-0.5 rounded-full font-semibold
+          ${exp.shift === 'shift1'
+            ? 'bg-red-100 text-red-700'
+            : exp.shift === 'shift2'
+            ? 'bg-amber-100 text-amber-700'
+            : 'bg-blue-100 text-blue-700'}">
+          ${exp.category}
+        </span>
+      </div>
+
+      <p class="text-sm font-semibold text-gray-800 leading-tight break-words">
+        ${exp.expense_name}
+      </p>
+    </div>
+
+    <!-- KANAN -->
+    <p class="text-sm font-bold whitespace-nowrap
+      ${exp.shift === 'shift1'
+        ? 'text-purple-600'
+        : exp.shift === 'shift2'
+        ? 'text-pink-600'
+        : 'text-blue-600'}">
+      Rp ${exp.amount.toLocaleString('id-ID')}
+    </p>
+
+  </div>
+</div>
+                                                                        `).join('')}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                        ` : `
+                       <div class="glass-effect card-modern rounded-3xl p-8 mb-6" style="display:none">
+                            <h3 class="text-2xl font-black text-gray-800 mb-6">🏷️ Pengeluaran per Kategori</h3>
+                            <div class="space-y-3">
+                                ${categoryTotals.map(cat => {
+                                    const categoryExpenses = filteredExpenses.filter(e => e.category === cat.category);
+                                    return `
+                                        <div>
+                                            <button onclick="toggleCategory('cat-${cat.category}')" class="w-full gradient-primary text-white rounded-2xl p-6 flex items-center justify-between hover:shadow-xl transition-all">
+                                                <span class="text-xl font-black">${cat.category}</span>
+                                                <div class="flex items-center gap-3">
+                                                    <p class="text-2xl font-black">Rp ${cat.total.toLocaleString('id-ID')}</p>
+                                                    <svg id="icon-cat-${cat.category}" class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                                    </svg>
+                                                </div>
+                                            </button>
+                                            <div id="detail-cat-${cat.category}" class="collapsible-content">
+                                                <div class="mt-3 space-y-2">
+                                                    ${categoryExpenses.map(exp => `
+                                                        <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+  <div class="flex items-start justify-between gap-3">
+
+    <!-- KIRI -->
+    <div class="flex flex-col gap-1 min-w-0">
+      <div class="flex items-center gap-2 text-xs text-gray-500">
+        <span class="font-semibold shrink-0">
+          ${new Date(exp.timestamp).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}
+        </span>
+
+        <span class="px-2 py-0.5 rounded-full font-semibold
+          ${exp.shift === 'shift1'
+            ? 'bg-red-100 text-red-700'
+            : exp.shift === 'shift2'
+            ? 'bg-amber-100 text-amber-700'
+            : 'bg-blue-100 text-blue-700'}">
+          ${exp.category}
+        </span>
+      </div>
+
+      <p class="text-sm font-semibold text-gray-800 leading-tight break-words">
+        ${exp.expense_name}
+      </p>
+    </div>
+
+    <!-- KANAN -->
+    <p class="text-sm font-bold whitespace-nowrap
+      ${exp.shift === 'shift1'
+        ? 'text-purple-600'
+        : exp.shift === 'shift2'
+        ? 'text-pink-600'
+        : 'text-blue-600'}">
+      Rp ${exp.amount.toLocaleString('id-ID')}
+    </p>
+
+  </div>
+</div>
+                                                    `).join('')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="glass-effect card-modern rounded-3xl p-8">
+                            <h3 class="text-2xl font-black text-gray-800 mb-6">📋 Pengeluaran Harian</h3>
+                            
+                            <div class="mb-6">
+${(() => {
+  const s1 = getLastShift(startDate, 'shift1'); // startDate = tanggal laporan
+
+  return `
+    <div class="rounded-xl p-4 mb-4 bg-red-300 border border-red-300">
+
+      <!-- BARIS 1 : SHIFT + IDENTITAS -->
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xl font-black text-red-800 tracking-tight">
+          Shift 1
+        </span>
+        <span class="text-sm font-semibold text-red-900/80">
+          👤 ${s1?.cashier || '-'} • 🕒 ${
+            s1?.openedAt
+              ? new Date(s1.openedAt).toLocaleTimeString('id-ID', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : '-'
+          }
+        </span>
+      </div>
+
+      <!-- BARIS 2 : INFO KAS -->
+      <div class="flex items-center justify-between text-sm font-semibold text-red-900">
+        <span>📥 Rp ${(s1?.startCash || 0).toLocaleString('id-ID')}</span>
+        <span>📤 Rp ${(s1?.endCash || 0).toLocaleString('id-ID')}</span>
+      </div>
+
+    </div>
+  `;
+})()}
+
+
+${shift1Expenses.length === 0 ? `
+  <p class="text-center text-gray-400 py-6">Tidak ada pengeluaran</p>
+` : `
+  <div class="space-y-2">
+    ${shift1Expenses.map(exp => `
+     <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+  <div class="flex items-start justify-between gap-3">
+
+    <!-- KIRI -->
+    <div class="flex flex-col gap-1 flex-1 min-w-0">
+      <div class="flex items-center gap-2 text-xs text-gray-500 font-semibold">
+        <span>
+          ${new Date(exp.timestamp).toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </span>
+
+        <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px] font-bold">
+          ${exp.category}
+        </span>
+      </div>
+
+      <p class="text-sm font-semibold text-gray-800 leading-snug break-words">
+        ${exp.expense_name}
+      </p>
+    </div>
+
+    <!-- KANAN -->
+    <p class="text-sm font-bold text-purple-600 whitespace-nowrap shrink-0">
+      Rp ${exp.amount.toLocaleString('id-ID')}
+    </p>
+
+  </div>
+</div>
+    `).join('')}
+  </div>
+`}
+</div>
+
+
+<div class="mb-6">
+${(() => {
+  const s2 = getLastShift(startDate, 'shift2'); // startDate = tanggal laporan
+
+  return `
+    <div class="rounded-xl p-4 mb-4 bg-amber-300 border border-red-300">
+
+      <!-- BARIS 1 : SHIFT + IDENTITAS -->
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xl font-black text-amber-800 tracking-tight">
+          Shift 2
+        </span>
+        <span class="text-sm font-semibold text-amber-900/80">
+          👤 ${s2?.cashier || '-'} • 🕒 ${
+            s2?.openedAt
+              ? new Date(s2.openedAt).toLocaleTimeString('id-ID', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : '-'
+          }
+        </span>
+      </div>
+
+      <!-- BARIS 2 : INFO KAS -->
+      <div class="flex items-center justify-between text-sm font-semibold text-amber-900">
+        <span>📥 Rp ${(s2?.startCash || 0).toLocaleString('id-ID')}</span>
+        <span>📤 Rp ${(s2?.endCash || 0).toLocaleString('id-ID')}</span>
+      </div>
+
+    </div>
+  `;
+})()}
+
+
+${shift2Expenses.length === 0 ? `
+  <p class="text-center text-gray-400 py-6">Tidak ada pengeluaran</p>
+` : `
+  <div class="space-y-2">
+    ${shift2Expenses.map(exp => `
+      <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+  <div class="flex items-start justify-between gap-3">
+
+    <!-- KIRI -->
+    <div class="flex flex-col gap-1 flex-1 min-w-0">
+      <div class="flex items-center gap-2 text-xs text-gray-500 font-semibold">
+        <span>
+          ${new Date(exp.timestamp).toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </span>
+
+        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold">
+          ${exp.category}
+        </span>
+      </div>
+
+      <p class="text-sm font-semibold text-gray-800 leading-snug break-words">
+        ${exp.expense_name}
+      </p>
+    </div>
+
+    <!-- KANAN -->
+    <p class="text-sm font-bold text-pink-600 whitespace-nowrap shrink-0">
+      Rp ${exp.amount.toLocaleString('id-ID')}
+    </p>
+
+  </div>
+</div>
+    `).join('')}
+  </div>
+`}
+</div>
+
+                            <div class="mb-4">
+
+  <!-- HEADER ADMIN -->
+  <div class="rounded-xl p-4 mb-3 bg-blue-300 border border-red-300">
+    <div class="flex items-center justify-between">
+      <span class="text-xl font-black text-red-800 tracking-tight">
+        Admin
+      </span>
+      <span class="text-sm font-semibold text-red-900/80">
+        📋 Admin
+      </span>
+    </div>
+  </div>
+
+  ${adminExpenses.length === 0 ? `
+    <p class="text-center text-gray-400 py-6 text-sm font-semibold">
+      Tidak ada pengeluaran
+    </p>
+  ` : `
+    <div class="space-y-2">
+      ${adminExpenses.map(exp => `
+        <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+          <div class="flex items-start justify-between gap-3">
+                            
+
+    <!-- KIRI -->
+    <div class="flex flex-col gap-1 flex-1 min-w-0">
+      <div class="flex items-center gap-2 text-xs text-gray-500 font-semibold">
+        <span>
+          ${new Date(exp.createdAt || exp.timestamp).toLocaleTimeString(
+            'id-ID',
+            { hour: '2-digit', minute: '2-digit' }
+          )}
+        </span>
+
+        <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold">
+          ${exp.category}
+        </span>
+      </div>
+
+      <p class="text-sm font-semibold text-gray-800 leading-snug break-words">
+        ${exp.expense_name}
+      </p>
+    </div>
+
+    <!-- KANAN -->
+    <p class="text-sm font-bold text-blue-600 whitespace-nowrap shrink-0">
+      Rp ${exp.amount.toLocaleString('id-ID')}
+    </p>
+
+  </div>
+</div>
+                                        `).join('')}
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+
+
+async function loginAdmin() {
+  const btn = document.getElementById('adminLoginBtn');
+  const originalText = btn.textContent;
+  btn.textContent = 'Memeriksa...';
+  btn.disabled = true;
+
+  const pin = document.getElementById('adminPin').value;
+  if (!pin) {
+    resetBtn();
+    showNotification('PIN wajib diisi', 'warning');
+    return;
+  }
+
+  // ===============================
+  // ⚡ 1️⃣ VALIDASI LOKAL DULU
+  // ===============================
+  const admin = getActiveCashiers().find(u =>
+    u.role === 'admin' &&
+    String(u.pin) === String(pin)
+  );
+
+  if (!admin) {
+    resetBtn();
+    showNotification('PIN admin salah', 'error');
+    return;
+  }
+
+ // ===========================
+// ADMIN = SHIFT VIRTUAL
+// ===========================
+currentShift = 'admin';
+
+currentSessionId = 'ADMIN-' + Date.now();
+
+shiftData.admin = {
+  status: 'open',
+  cashier: 'ADMIN',
+  sessionId: currentSessionId,
+  openedAt: new Date().toISOString()
+};
+
+  // ===============================
+  // 🚀 2️⃣ UI FIRST (INSTAN)
+  // ===============================
+  closeAdminPinDialog();
+  currentView = 'admin';
+  renderCurrentView();
+
+  showNotification(`Selamat datang, ${admin.name}`, 'success');
+  resetBtn();
+
+  // BACKEND FIRE & FORGET
+  if (navigator.onLine) {
+    const fd = new FormData();
+    fd.append('action', 'loginAdmin');
+    fd.append('pin', pin);
+    fd.append('__sync', '1');
+
+    fetch(API_BASE, { method: 'POST', body: fd }).catch(() => {});
+  }
+
+  function resetBtn() {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+
+
+
+        function selectShift(shift) {
+            if (shift === 'shift1' && shiftData.shift1.status === 'closed') {
+                showNotification('🔒 Shift 1 sudah ditutup!', 'warning');
+                return;
+            }
+            if (shift === 'shift2' && shiftData.shift2.status === 'closed') {
+                showNotification('🔒 Shift 2 sudah ditutup!', 'warning');
+                return;
+            }
+            if (shift === 'shift2' && shiftData.shift1.status === 'open') {
+                showNotification('⚠️ Shift 1 harus ditutup dulu!', 'warning');
+                return;
+            }
+            currentShift = shift;
+            currentView = shift;
+            renderCurrentView();
+        }
+
+        function backToHome() {
+            currentView = 'home';
+            currentShift = null;
+            currentCashier = null;
+            renderCurrentView();
+        }
+ 
+        function showAdminPinDialog() {
+  // hapus jika masih ada
+  document.getElementById('adminPinDialog')?.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'adminPinDialog';
+  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+  modal.onclick = closeAdminPinDialog; // klik background = tutup
+
+  modal.innerHTML = `
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
+         onclick="event.stopPropagation()">
+
+      <h3 class="text-2xl font-black mb-2 text-center">🔐 PIN Admin</h3>
+      <p class="text-center text-gray-500 mb-6">Masukkan PIN untuk akses admin</p>
+
+      <input
+        id="adminPin"
+        type="password"
+        placeholder="Masukkan PIN"
+        class="input-modern w-full rounded-xl px-4 py-3 mb-6 text-center text-xl"
+      />
+
+      <div class="flex gap-3">
+        <button
+          onclick="closeAdminPinDialog()"
+          class="flex-1 bg-gray-200 hover:bg-gray-300 rounded-xl py-3 font-bold"
+        >
+          Batal
+        </button>
+
+        <button
+  id="adminLoginBtn"
+  onclick="loginAdmin()"
+  class="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 font-bold"
+>
+  Masuk
+</button>
+
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // auto focus + Enter submit
+  setTimeout(() => {
+    const input = document.getElementById('adminPin');
+    input?.focus();
+    input?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') loginAdmin();
+    });
+  }, 50);
+}
+
+        function closeAdminPinDialog() {
+            const dialog = document.getElementById('adminPinDialog');
+            if (dialog) dialog.remove();
+        }
+
+        function useShift1EndCash() {
+            const input = document.getElementById('startCash');
+            if (input) {
+                input.value = formatRupiah(shiftData.shift1.endCash.toString());
+            }
+        }
+
+        function formatCurrencyInput(input) {
+            const value = input.value.replace(/\D/g, '');
+            input.value = formatRupiah(value);
+        }
+
+async function loginShift() {
+  const btn = document.getElementById('startShiftBtn');
+  const originalText = btn.textContent;
+  btn.textContent = 'Memulai shift...';
+  btn.disabled = true;
+
+  const cashierName = document.getElementById('cashierSelect').value;
+  const pin = document.getElementById('cashierPin').value;
+  const startCash = parseRupiah(document.getElementById('startCash').value);
+  const shift = currentShift;
+
+  if (!shift || !cashierName || !pin || startCash <= 0) {
+    btn.textContent = originalText;
+    btn.disabled = false;
+    showNotification('Data tidak lengkap', 'warning');
+    return;
+  }
+
+  // =====================================================
+  // 🔒 GUARD — JANGAN BUKA SHIFT JIKA SUDAH OPEN DI UI
+  // =====================================================
+  if (shiftData[shift]?.status === 'open') {
+    btn.textContent = originalText;
+    btn.disabled = false;
+    showNotification('Shift sudah terbuka', 'warning');
+    return;
+  }
+
+  // =====================================================
+  // 🔑 BUAT SESSION ID (SATU KALI)
+  // =====================================================
+  const sessionId =
+    'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+
+  // =====================================================
+  // 🔌 OFFLINE LOGIN
+  // =====================================================
+  if (!navigator.onLine) {
+    const ok = verifyPinOffline(cashierName, pin);
+    if (!ok) {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      showNotification('PIN salah (offline)', 'error');
+      return;
+    }
+
+    // UI-FIRST
+    shiftData[shift] = {
+      status: 'open',
+      cashier: cashierName,
+      startCash,
+      openedAt: safeISODate(new Date()),
+      sessionId // 🔑 SIMPAN SESSION
+    };
+
+    currentShift = shift;
+    currentCashier = cashierName;
+    currentView = shift;
+
+    renderCurrentView();
+
+    // simpan ke queue
+    await saveToQueue({
+      id: 'loginShift-' + Date.now(),
+      payload: {
+        action: 'loginShift',
+        shift,
+        cashier: cashierName,
+        pin,
+        startCash,
+        sessionId // 🔑 KIRIM SESSION
+      }
+    });
+
+    showNotification(
+      'Offline: shift dibuka dengan verifikasi lokal',
+      'warning'
+    );
+
+    btn.textContent = originalText;
+    btn.disabled = false;
+    return;
+  }
+
+  // =====================================================
+  // 🌐 ONLINE LOGIN (UI-FIRST)
+  // =====================================================
+
+  // UI langsung pindah
+  shiftData[shift] = {
+    status: 'open',
+    cashier: cashierName,
+    startCash,
+    openedAt: safeISODate(new Date()),
+    sessionId // 🔑 SIMPAN SESSION
+  };
+
+  currentShift = shift;
+  currentCashier = cashierName;
+  currentView = shift;
+
+  renderCurrentView();
+
+  // backend sinkron
+  const fd = new FormData();
+  fd.append('action', 'loginShift');
+  fd.append('pin', pin);
+  fd.append('shift', shift);
+  fd.append('cashier', cashierName);
+  fd.append('startCash', startCash);
+  fd.append('sessionId', sessionId); // 🔑 KIRIM SESSION
+  fd.append('__sync', '1');
+
+  try {
+    const res = await fetch(API_BASE, { method: 'POST', body: fd });
+    const json = await res.json();
+
+    if (!json.success) {
+      showNotification(
+        json.message || 'Sinkronisasi login gagal',
+        'warning'
+      );
+    }
+  } catch (err) {
+    // fallback ke queue
+    await saveToQueue({
+      id: 'loginShift-' + Date.now(),
+      payload: {
+        action: 'loginShift',
+        shift,
+        cashier: cashierName,
+        pin,
+        startCash,
+        sessionId // 🔑 KIRIM SESSION
+      }
+    });
+
+    showNotification(
+      'Offline, akan disinkronkan saat online',
+      'warning'
+    );
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+
+
+function showCloseShiftConfirmation(kasAkhir) {
+  // 🔥 simpan kas akhir ke global sementara
+  window.__closeShiftCash = kasAkhir;
+
+  const modal = document.createElement('div');
+  modal.id = 'close-confirm-modal';
+  modal.className =
+    'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+
+  modal.innerHTML = `
+    <div class="w-full max-w-md glass-effect card-modern rounded-3xl p-8 animate-slide-in">
+  <div class="text-center mb-6">
+    <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <h3 class="text-2xl font-black text-gray-800 mb-2">
+      Konfirmasi Penutupan Shift 1
+    </h3>
+    <p class="text-gray-500 font-medium">
+      Verifikasi dengan kasir Shift 2
+    </p>
+  </div>
+
+  <div class="gradient-primary rounded-2xl p-5 text-white mb-6">
+    <p class="text-sm font-bold opacity-90 mb-1">
+      Kas Akhir yang Tercatat
+    </p>
+    <p class="text-3xl font-black">
+      Rp ${window.__closeShiftCash.toLocaleString('id-ID')}
+    </p>
+  </div>
+
+  <div class="space-y-4 mb-6">
+    <div>
+      <label class="block text-sm font-bold text-gray-700 mb-2">
+        Pilih Kasir Shift 2
+      </label>
+      <div class="relative">
+        <select
+          id="cashierShift2"
+          class="input-modern w-full rounded-xl px-4 py-3 pr-12 text-base appearance-none cursor-pointer bg-white hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+        >
+          <option value="">Pilih Kasir</option>
+          ${(window.LOCAL_CASHIERS || [])
+  .filter(u => u.active)
+  .map(u => `<option value="${u.name}">${u.name}</option>`)
+  .join('')}
+        </select>
+
+        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-bold text-gray-700 mb-2">
+        PIN Kasir Shift 2
+      </label>
+      <input
+        type="password"
+        id="pinShift2"
+        placeholder="Masukkan PIN"
+        class="input-modern w-full rounded-xl px-4 py-3 text-base"
+      />
+    </div>
+  </div>
+
+  <div class="flex gap-3">
+    <button
+      onclick="closeConfirmModal()"
+      class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-6 rounded-xl font-bold text-base transition-all"
+    >
+      Batal
+    </button>
+
+    <button
+      id="confirmCloseBtn"
+      onclick="confirmCloseShift(window.__closeShiftCash)"
+      class="flex-1 gradient-primary text-white py-3 px-6 rounded-xl font-bold text-base shadow-lg"
+    >
+      Konfirmasi
+    </button>
+  </div>
+</div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+
+function closeConfirmModal() {
+  document.getElementById('close-confirm-modal')?.remove();
+}
+
+
+async function addExpense() {
+  const name = document.getElementById('expenseName').value.trim();
+  const amountRaw = document.getElementById('expenseAmount').value;
+  const category = document.getElementById('expenseCategory').value;
+  const amount = parseRupiah(amountRaw);
+
+  if (!name || !category || amount <= 0) {
+    showNotification('Data tidak lengkap', 'warning');
+    return;
+  }
+
+  if (!currentShift || !shiftData[currentShift]?.sessionId) {
+    showNotification('Shift belum aktif', 'warning');
+    return;
+  }
+
+  // 🔑 ID FINAL (GLOBAL & STABIL)
+  const expenseId =
+    'exp-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+
+  const expense = {
+    id: expenseId,
+    shift: currentShift,
+    sessionId: shiftData[currentShift].sessionId,
+    cashier: currentCashier || shiftData[currentShift].cashier,
+    expense_name: name,
+    category,
+    amount,
+    createdAt:  safeISODate(new Date()),
+  };
+
+  // =========================
+  // 1️⃣ UI-FIRST (OPTIMISTIC)
+  // =========================
+  expenses.push(expense);
+  renderCurrentView();
+
+  // reset form
+  document.getElementById('expenseName').value = '';
+  document.getElementById('expenseAmount').value = '';
+  document.getElementById('expenseCategory').value = '';
+
+  // =========================
+  // 2️⃣ SELALU MASUK QUEUE
+  // =========================
+  await saveToQueue({
+  id: 'addExpense-' + expenseId,
+  payload: {
+    action: 'addExpense',
+    ...expense
+  }
+});
+
+// 🔔 JIKA ONLINE, LANGSUNG PROSES QUEUE
+if (navigator.onLine) {
+  processQueue();
+}
+     }
+
+
+
+
+       async function deleteExpense(id) {
+  if (!id) return;
+
+  // 1️⃣ UI-FIRST: langsung hilangkan dari UI
+  expenses = expenses.filter(e => e.id !== id);
+  renderCurrentView();
+
+  // 2️⃣ SELALU simpan ke queue (online / offline sama)
+  await saveToQueue({
+  id: 'deleteExpense-' + id,
+  payload: {
+    action: 'deleteExpense',
+    id
+  }
+});
+
+// 🔔 trigger sync jika online
+if (navigator.onLine) {
+  processQueue();
+}
+
+
+  showNotification('Pengeluaran dihapus', 'info');
+}
+
+
+
+function closeShift() {
+  // 🔒 guard: jangan tutup kalau sudah closed
+  if (shiftData[currentShift]?.status === 'closed') {
+    showNotification('Shift sudah ditutup', 'warning');
+    return;
+  }
+
+  const app = document.getElementById('app');
+  const dialog = document.createElement('div');
+  dialog.id = 'closeShiftDialog';
+  dialog.className =
+    'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-6 backdrop-blur-sm';
+  dialog.style.zIndex = '1000';
+
+  dialog.innerHTML = `
+    <div class="w-full max-w-md glass-effect card-modern rounded-3xl p-8 animate-slide-in">
+      <div class="text-center mb-6">
+        <h3 class="text-2xl font-black text-gray-800 mb-2">
+          Tutup ${currentShift === 'shift1' ? 'Shift 1' : 'Shift 2'}
+        </h3>
+        <p class="text-gray-500 font-medium">Masukkan kas akhir shift</p>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-gray-700 mb-2">Kas Akhir</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-600">Rp</span>
+          <input
+            type="text"
+            id="endCash"
+            placeholder="0"
+            oninput="formatCurrencyInput(this)"
+            class="input-modern w-full rounded-xl pl-12 pr-4 py-3"
+          >
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button
+          type="button"
+          onclick="cancelCloseShift()"
+          class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-xl font-bold"
+        >
+          Batal
+        </button>
+
+        <button
+          type="button"
+          onclick="processCloseShift()"
+          class="flex-1 gradient-primary text-white py-3 rounded-xl font-bold shadow-lg"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+  `;
+
+  app.appendChild(dialog);
+}
+
+
+         
+       function processCloseShift() {
+  const endCashValue = document.getElementById('endCash')?.value;
+  const endCash = parseRupiah(endCashValue);
+
+  if (!endCash || endCash <= 0) {
+    showNotification('⚠️ Kas akhir harus diisi!', 'warning');
+    return;
+  }
+
+  cancelCloseShift();
+
+  // 🔥 Shift 1 → konfirmasi 2 kasir
+  if (currentShift === 'shift1') {
+    showCloseShiftConfirmation(endCash);
+  } else {
+    // Shift 2 langsung finalize
+    finalizeCloseShift(endCash);
+  }
+}
+
+
+async function confirmCloseShift(kasAkhir) {
+  const btn = document.getElementById('confirmCloseBtn');
+  if (btn) {
+    btn.textContent = 'Memverifikasi...';
+    btn.disabled = true;
+  }
+
+  const cashier2El = document.getElementById('cashierShift2');
+  const pin2El = document.getElementById('pinShift2');
+
+  if (!cashier2El || !pin2El) {
+    showNotification('Form konfirmasi tidak lengkap', 'error');
+    if (btn) {
+      btn.textContent = 'Konfirmasi';
+      btn.disabled = false;
+    }
+    return;
+  }
+
+  const cashier2 = cashier2El.value;
+  const pinShift2 = pin2El.value;
+
+  if (!cashier2 || !pinShift2) {
+    showNotification('Lengkapi kasir & PIN shift 2', 'warning');
+    if (btn) {
+      btn.textContent = 'Konfirmasi';
+      btn.disabled = false;
+    }
+    return;
+  }
+
+const ok = (window.LOCAL_CASHIERS || []).some(u =>
+  u.name === cashier2 &&
+  String(u.pin) === String(pinShift2) &&
+  u.active === true
+);
+
+if (!ok) {
+  showNotification('PIN kasir Shift 2 salah', 'error');
+  if (btn) {
+    btn.textContent = 'Konfirmasi';
+    btn.disabled = false;
+  }
+  return;
+}
+
+closeConfirmModal();
+await finalizeCloseShift(kasAkhir);
+return;
+
+}
+
+async function finalizeCloseShift(endCash) {
+  // 🔒 guard dasar
+  if (!currentShift || shiftData[currentShift]?.status === 'closed') {
+    showNotification('Shift sudah ditutup', 'warning');
+    return;
+  }
+
+  const sessionId = shiftData[currentShift]?.sessionId;
+  if (!sessionId) {
+    showNotification(
+      'Session shift tidak valid, silakan refresh',
+      'error'
+    );
+    return;
+  }
+
+  const closedAt = safeISODate(new Date());
+
+
+  // ================================
+  // 1️⃣ update state lokal (UI-FIRST)
+  // ================================
+  shiftData[currentShift].status = 'closed';
+  shiftData[currentShift].endCash = endCash;
+  shiftData[currentShift].closedAt = closedAt;
+
+  const closedShift = currentShift;
+
+  // 🔥 MATIKAN SHIFT AKTIF
+  currentShift = null;
+  currentView = 'home';
+
+  renderCurrentView();
+
+  // ================================
+  // 2️⃣ payload CLOSE (PAKAI sessionId)
+  // ================================
+  const payload = {
+    action: 'closeShift',
+    shift: closedShift,
+    endCash,
+    closedAt,
+    sessionId // 🔑 KUNCI UTAMA
+  };
+
+  // ================================
+  // 3️⃣ OFFLINE → QUEUE
+  // ================================
+  if (!navigator.onLine) {
+    await saveToQueue({
+      id: 'closeShift-' + Date.now(),
+      payload
+    });
+
+    showNotification(
+      'Offline: shift ditutup dan akan disinkronkan',
+      'warning'
+    );
+    return;
+  }
+
+  // ================================
+  // 4️⃣ ONLINE → BACKEND
+  // ================================
+  const fd = new FormData();
+  Object.entries(payload).forEach(([k, v]) => fd.append(k, v));
+  fd.append('__sync', '1');
+
+  try {
+    const res = await fetch(API_BASE, {
+      method: 'POST',
+      body: fd
+    });
+
+    const json = await res.json();
+
+    if (!json.success) {
+      showNotification(
+        json.message || 'Sinkronisasi tutup shift gagal',
+        'warning'
+      );
+    }
+  } catch (err) {
+    // fallback ke queue
+    await saveToQueue({
+      id: 'closeShift-' + Date.now(),
+      payload
+    });
+
+    showNotification(
+      'Offline, akan disinkronkan saat online',
+      'warning'
+    );
+  }
+}
+
+
+// ===============================
+// 🔽 DROPDOWN SUGGESTION EXPENSE
+// ===============================
+
+function initExpenseSuggestion() {
+  const inputs = document.querySelectorAll('#expenseName');
+
+  inputs.forEach(input => {
+
+    // Hindari double init
+    if (input.dataset.suggestInit === "true") return;
+    input.dataset.suggestInit = "true";
+
+    // Pastikan wrapper relative
+    if (!input.parentElement.classList.contains('suggest-wrapper')) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'relative suggest-wrapper';
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+    }
+
+    const wrapper = input.parentElement;
+
+    // Buat dropdown
+    const dropdown = document.createElement('div');
+    dropdown.className =
+      'absolute left-0 top-full z-50 w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-y-auto hidden';
+    wrapper.appendChild(dropdown);
+
+    input.addEventListener('input', function () {
+      const keyword = this.value.trim().toLowerCase();
+
+      if (!keyword) {
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      if (!expenses || !expenses.length) {
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      const uniqueNames = [...new Set(
+  expenses
+    .map(e => {
+      // Paksa ambil hanya expense_name
+      if (typeof e.expense_name === 'string') {
+        return e.expense_name.trim();
+      }
+      return null;
+    })
+    .filter(name => name && name.length > 0)
+)];
+
+
+      // 🔎 Cari di awal / tengah / akhir
+      const results = uniqueNames.filter(name =>
+        name.toLowerCase().includes(keyword)
+      );
+
+      if (results.length === 0) {
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      dropdown.innerHTML = results
+        .slice(0, 10)
+        .map(name => `
+          <div class="px-4 py-2 hover:bg-red-50 cursor-pointer text-sm font-semibold border-b border-gray-100 last:border-none">
+            ${name}
+          </div>
+        `).join('');
+
+      dropdown.classList.remove('hidden');
+
+      dropdown.querySelectorAll('div').forEach(item => {
+        item.addEventListener('click', function () {
+          input.value = this.textContent.trim();
+          dropdown.classList.add('hidden');
+        });
+      });
+    });
+
+    // Klik luar = tutup dropdown
+    document.addEventListener('click', function (e) {
+      if (!wrapper.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+  });
+}
+
+
+
+        function cancelCloseShift() {
+            const dialog = document.getElementById('closeShiftDialog');
+            if (dialog) dialog.remove();
+        }
+
+function logoutAdmin() {
+  delete shiftData.admin;
+  currentShift = null;
+  currentSessionId = null;
+
+  adminDataReady = false; // kalau masih dipakai
+  currentView = 'home';
+  renderCurrentView();
+}
+
+
+     function applyFilters() {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  const search = document.getElementById('searchInput').value;
+
+  if (!startDate || !endDate) {
+    showNotification('⚠️ Pilih periode!', 'warning');
+    return;
+  }
+
+  selectedPeriodStart = startDate;
+  selectedPeriodEnd = endDate;
+  searchQuery = search;
+
+  showNotification('✅ Filter diterapkan!', 'success');
+
+  // 1️⃣ Render ulang admin view
+  renderCurrentView();
+
+  // 2️⃣ TRIGGER CHART JIKA MULTI-DAY (INI KUNCI)
+  if (startDate !== endDate) {
+    requestAnimationFrame(() => {
+      createChart();
+    });
+  }
+}
+
+function toggleChartData(type) {
+  chartVisibleData[type] = !chartVisibleData[type];
+
+  const button = document.getElementById(`chart-toggle-${type}`);
+  if (chartVisibleData[type]) {
+    if (type === 'Belanja Bahan Baku')
+      button.className = 'px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-red-600 to-red-700 text-white';
+    else if (type === 'Operasional')
+      button.className = 'px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-amber-600 to-amber-700 text-white';
+    else
+      button.className = 'px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white';
+  } else {
+    button.className = 'px-6 py-3 rounded-xl font-bold transition-all shadow-md bg-gray-200 text-gray-400';
+  }
+
+  // 🔥 JANGAN updateChart (tidak ada)
+  requestAnimationFrame(() => {
+    createChart();
+  });
+}
+
+function createChart() {
+  // ===============================
+  // INIT VISIBILITY
+  // ===============================
+  if (!window.chartVisibleData) window.chartVisibleData = {};
+  CATEGORIES.forEach(cat => {
+    if (chartVisibleData[cat] === undefined) chartVisibleData[cat] = true;
+  });
+
+  const canvas = document.getElementById('expenseChart');
+  if (!canvas) return;
+
+  const todayISO = safeISODate(new Date())?.split('T')[0];
+  if (!todayISO) return;
+
+  const startDate = selectedPeriodStart || todayISO;
+  const endDate = selectedPeriodEnd || todayISO;
+
+  // ===============================
+  // FILTER EXPENSES
+  // ===============================
+  const filteredExpenses = expenses.filter(exp => {
+    const dateSource = exp.createdAt || exp.timestamp;
+    if (!dateSource) return false;
+
+    const iso = safeISODate(dateSource);
+    if (!iso) return false;
+
+    const expDate = iso.split('T')[0];
+    if (expDate < startDate || expDate > endDate) return false;
+
+    if (
+      searchQuery &&
+      !(exp.expense_name || '')
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (filteredExpenses.length === 0) return;
+
+  // ===============================
+  // GROUP BY DATE + CATEGORY
+  // ===============================
+  const expensesByDate = {};
+
+  filteredExpenses.forEach(exp => {
+    const iso = safeISODate(exp.createdAt || exp.timestamp);
+    if (!iso) return;
+
+    const dateKey = iso.split('T')[0];
+
+    if (!expensesByDate[dateKey]) {
+      expensesByDate[dateKey] = {};
+      CATEGORIES.forEach(cat => (expensesByDate[dateKey][cat] = 0));
+    }
+
+    if (expensesByDate[dateKey][exp.category] !== undefined) {
+      expensesByDate[dateKey][exp.category] += exp.amount;
+    }
+  });
+
+  const sortedDates = Object.keys(expensesByDate).sort();
+  if (sortedDates.length === 0) return;
+
+  const labels = sortedDates.map(d =>
+    new Date(d).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short'
+    })
+  );
+
+  // ===============================
+  // DATASETS
+  // ===============================
+  const datasets = [];
+
+  CATEGORIES.forEach(cat => {
+    if (!chartVisibleData[cat]) return;
+
+    datasets.push({
+      label: cat,
+      data: sortedDates.map(d => expensesByDate[d][cat] || 0),
+      borderWidth: 0,
+      borderRadius: 8,
+      borderSkipped: false,
+      bbackgroundColor:
+  cat === 'Belanja Bahan Baku'
+    ? 'rgba(220, 38, 38, 0.85)'
+    : cat === 'Operasional'
+    ? 'rgba(245, 158, 11, 0.85)'
+    : 'rgba(59, 130, 246, 0.85)',
+    });
+  });
+
+  if (datasets.length === 0) return;
+
+  // ===============================
+  // RENDER CHART
+  // ===============================
+  if (window.chartInstance) {
+    window.chartInstance.destroy();
+  }
+
+  window.chartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+
+   
+function formatTanggalBackend(dateStr) {
+  const d = new Date(dateStr);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+        function updateChart() {
+  if (!chartInstance) return;
+
+  const todayISO = safeISODate(new Date())?.split('T')[0];
+  if (!todayISO) return;
+
+  const startDate = selectedPeriodStart || todayISO;
+  const endDate = selectedPeriodEnd || todayISO;
+
+  const filteredExpenses = expenses.filter(exp => {
+    const iso = safeISODate(new Date(exp.timestamp));
+    if (!iso) return false;
+
+    const expDate = iso.split('T')[0];
+    const matchesPeriod = expDate >= startDate && expDate <= endDate;
+    const matchesSearch =
+      !searchQuery ||
+      exp.expense_name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesPeriod && matchesSearch;
+  });
+
+  const expensesByDate = {};
+  filteredExpenses.forEach(exp => {
+    const iso = safeISODate(new Date(exp.timestamp));
+    if (!iso) return;
+
+    const dateKey = iso.split('T')[0];
+    if (!expensesByDate[dateKey]) {
+      expensesByDate[dateKey] = {
+        'Bahan Baku': 0,
+        'Operasional': 0,
+        'Staff': 0
+      };
+    }
+    expensesByDate[dateKey][exp.category] += exp.amount;
+  });
+
+
+                
+                const sortedDates = Object.keys(expensesByDate).sort();
+                
+                const datasets = [];
+                
+                if (chartVisibleData['Bahan Baku']) {
+                    datasets.push({
+                        label: 'Bahan Baku',
+                        data: sortedDates.map(date => expensesByDate[date]['Bahan Baku']),
+                        backgroundColor: 'rgba(220, 38, 38, 0.85)',
+                        borderColor: 'rgb(220, 38, 38)',
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    });
+                }
+                
+                if (chartVisibleData['Operasional']) {
+                    datasets.push({
+                        label: 'Operasional',
+                        data: sortedDates.map(date => expensesByDate[date]['Operasional']),
+                        backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                        borderColor: 'rgb(245, 158, 11)',
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    });
+                }
+                
+                if (chartVisibleData['Staff']) {
+                    datasets.push({
+                        label: 'Staff',
+                        data: sortedDates.map(date => expensesByDate[date]['Staff']),
+                        backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    });
+                }
+                
+                chartInstance.data.datasets = datasets;
+                chartInstance.update();
+            }
+    
+
+        function toggleCategory(id) {
+            const detail = document.getElementById(`detail-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            
+            if (detail && icon) {
+                if (detail.classList.contains('open')) {
+                    detail.classList.remove('open');
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    detail.classList.add('open');
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const existing = document.getElementById('toast-message');
+            if (existing) existing.remove();
+            
+            let bgColor = '#dc2626';
+            if (type === 'success') bgColor = '#10b981';
+            if (type === 'warning') bgColor = '#f59e0b';
+            
+            const toast = document.createElement('div');
+            toast.id = 'toast-message';
+            toast.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 px-6 py-4 rounded-2xl shadow-2xl font-bold z-50 animate-slide-in';
+            toast.style.backgroundColor = bgColor;
+            toast.style.color = 'white';
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        function onConfigChange(config) {
+            renderCurrentView();
+        }
+
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities: () => ({
+                    recolorables: [],
+                    borderables: [],
+                    fontEditable: undefined,
+                    fontSizeable: undefined
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ["app_title", config.app_title || defaultConfig.app_title],
+                    ["shift1_label", config.shift1_label || defaultConfig.shift1_label],
+                    ["shift2_label", config.shift2_label || defaultConfig.shift2_label],
+                    ["admin_label", config.admin_label || defaultConfig.admin_label]
+                ])
+            });
+        }
+
+     // ===============================
+// INIT APLIKASI
+// ===============================
+window.addEventListener('load', () => {
+  init();
+});
+
+   document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && navigator.onLine) {
+    processQueue();
+  }
+});
+   // 🔁 fallback sync tiap 30 detik (jika online & ada queue)
+setInterval(() => {
+  if (navigator.onLine) {
+    processQueue();
+  }
+}, 30000);
+
+
+    </script>
+
+</body>
+</html>
+
