@@ -272,51 +272,33 @@
 let isSyncing = false;        
 let db;
 
-   function restoreOpenShift() {
+function restoreOpenShift() {
 
   if (!shiftData) return false;
 
-  const s1 = shiftData.shift1;
-  const s2 = shiftData.shift2;
+  // SHIFT 1
+  if (shiftData.shift1 && shiftData.shift1.status === "open") {
 
-  // SHIFT 1 MASIH OPEN
-  if (s1 && s1.status === 'open') {
+    currentShift = "shift1";
+    currentCashier = shiftData.shift1.cashier;
+    currentView = "shift1";   // 🔥 penting
 
-    currentShift = 'shift1';
-    currentCashier = s1.cashier;
-
-    shiftData.shift1 = {
-      ...shiftData.shift1,
-      status: 'open',
-      startCash: s1.startCash,
-      cashier: s1.cashier,
-      openedAt: s1.openedAt
-    };
-
-    currentView = 'shift';
     return true;
   }
 
-  // SHIFT 2 MASIH OPEN
-  if (s2 && s2.status === 'open') {
+  // SHIFT 2
+  if (shiftData.shift2 && shiftData.shift2.status === "open") {
 
-    currentShift = 'shift2';
-    currentCashier = s2.cashier;
+    currentShift = "shift2";
+    currentCashier = shiftData.shift2.cashier;
+    currentView = "shift2";   // 🔥 penting
 
-    shiftData.shift2 = {
-      ...shiftData.shift2,
-      status: 'open',
-      startCash: s2.startCash,
-      cashier: s2.cashier,
-      openedAt: s2.openedAt
-    };
-
-    currentView = 'shift';
     return true;
   }
 
   return false;
 }
+   
 function normalizeExpenses() {
   expenses = expenses.map(e => {
     let raw = e.createdAt || e.timestamp;
@@ -661,12 +643,11 @@ async function loadBackendData() {
   }
 
    // 🔥 AUTO RESTORE SHIFT
-if (!currentShift) {
-  const restored = restoreOpenShift();
-  if (restored) {
-    renderCurrentView();
-    return;
-  }
+const restored = restoreOpenShift();
+
+if (restored) {
+  renderCurrentView();
+  return;
 }
      
   renderCurrentView(); // update UI tanpa reload
