@@ -2405,10 +2405,13 @@ shiftData.admin = {
         }
 
         function useShift1EndCash(amount){
+
   const input = document.getElementById('startCash');
-  if(input){
-    input.value = 'Rp ' + amount.toLocaleString('id-ID');
-  }
+
+  if(!input) return;
+
+  input.value = amount.toLocaleString('id-ID');
+
 }
 
         function formatCurrencyInput(input) {
