@@ -2294,7 +2294,10 @@ shiftData.admin = {
   // ===============================
   closeAdminPinDialog();
   currentView = 'admin';
-  renderCurrentView();
+
+await loadAllExpensesForAdmin();
+
+renderCurrentView();
 
   showNotification(`Selamat datang, ${admin.name}`, 'success');
   resetBtn();
