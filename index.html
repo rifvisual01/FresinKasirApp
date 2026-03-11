@@ -844,23 +844,36 @@ window.__renderingAdmin = false;
       loadBackendData()
     ])
       .then(() => {
-        normalizeExpenses();
-        adminDataReady = true;
 
-        // 2️⃣ render ulang admin screen SETELAH data siap
-        app.innerHTML = renderAdminScreen();
+  normalizeExpenses();
+  adminDataReady = true;
 
-        // 3️⃣ trigger grafik HANYA jika multi-day
-        const todayISO = safeISODate(new Date())?.split('T')[0];
-        const startDate = selectedPeriodStart || todayISO;
-        const endDate = selectedPeriodEnd || todayISO;
+  // 🔄 JANGAN render ulang seluruh admin screen
+  // cukup update bagian laporan / summary saja
+  if (currentView === 'admin') {
 
-        if (startDate && endDate && startDate !== endDate) {
-          requestAnimationFrame(() => {
-            createChart();
-          });
-        }
-      })
+    if (typeof renderAdminReport === 'function') {
+      renderAdminReport();
+    }
+
+    if (typeof renderAdminSummary === 'function') {
+      renderAdminSummary();
+    }
+
+  }
+
+  // 3️⃣ trigger grafik HANYA jika multi-day
+  const todayISO = safeISODate(new Date())?.split('T')[0];
+  const startDate = selectedPeriodStart || todayISO;
+  const endDate = selectedPeriodEnd || todayISO;
+
+  if (startDate && endDate && startDate !== endDate) {
+    requestAnimationFrame(() => {
+      createChart();
+    });
+  }
+
+})
       .catch(() => {
         // fallback aman (misal koneksi putus mendadak)
         normalizeExpenses();
