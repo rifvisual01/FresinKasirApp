@@ -684,10 +684,16 @@ async function init() {
 }
 async function loadBackendData() {
   if (!navigator.onLine) return;
+
+  // 🔒 cegah fetch bersamaan
+  if (window.__loadingBackend) return;
+  window.__loadingBackend = true;
+
   const fd = new FormData();
   fd.append('action', 'getData');
 
   try {
+
     const res = await fetch(API_BASE, {
       method: 'POST',
       body: fd
@@ -697,32 +703,50 @@ async function loadBackendData() {
 
     if (json.success) {
 
-  // 🔒 JANGAN TIMPA expenses SAAT MODE ADMIN
-  if (currentView !== 'admin') {
-    expenses = json.data.expenses || [];
-  }
+      // 🔒 jangan timpa expenses saat admin terbuka
+      if (currentView !== 'admin') {
+        expenses = json.data.expenses || [];
+      }
 
-  cashiers = json.data.cashiers || [];
-  if (navigator.onLine && json.data.shiftHistory) {
-  shiftHistory = json.data.shiftHistory;
-}
+      cashiers = json.data.cashiers || [];
 
-if (navigator.onLine && json.data.shiftData) {
-  shiftData = json.data.shiftData;
-}
+      if (navigator.onLine && json.data.shiftHistory) {
+        shiftHistory = json.data.shiftHistory;
+      }
 
-   // 🔥 AUTO RESTORE SHIFT
-const restored = restoreOpenShift();
+      if (navigator.onLine && json.data.shiftData) {
+        shiftData = json.data.shiftData;
+      }
 
-if (restored) {
-  renderCurrentView();
-  return;
-}
-     
-  renderCurrentView(); // update UI tanpa reload
-}
+      // 🔥 AUTO RESTORE SHIFT
+      const restored = restoreOpenShift();
+
+      if (restored) {
+
+        // ⛔ jangan render ulang jika sedang di admin
+        if (currentView !== 'admin') {
+          renderCurrentView();
+        }
+
+        window.__loadingBackend = false;
+        return;
+      }
+
+      // ⛔ admin jangan render ulang saat sync
+      if (currentView !== 'admin') {
+        renderCurrentView();
+      }
+
+    }
+
   } catch (err) {
+
     console.error('Backend load failed', err);
+
+  } finally {
+
+    window.__loadingBackend = false;
+
   }
 }
 
@@ -776,12 +800,19 @@ function renderCurrentView() {
   // ADMIN (FINAL – STABIL)
   // =====================
  if (currentView === 'admin') {
+
+  // 🔒 GUARD: cegah render admin berulang saat sync
+  if (window.__renderingAdmin) return;
+  window.__renderingAdmin = true;
+  
   // 1️⃣ render awal (UI langsung tampil)
   app.innerHTML = renderAdminScreen();
 requestAnimationFrame(() => {
   initExpenseSuggestion();
 });
-
+  
+window.__renderingAdmin = false;
+  
   if (!adminDataReady) {
 
     // ===============================
