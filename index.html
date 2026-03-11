@@ -684,16 +684,10 @@ async function init() {
 }
 async function loadBackendData() {
   if (!navigator.onLine) return;
-
-  // 🔒 cegah fetch bersamaan
-  if (window.__loadingBackend) return;
-  window.__loadingBackend = true;
-
   const fd = new FormData();
   fd.append('action', 'getData');
 
   try {
-
     const res = await fetch(API_BASE, {
       method: 'POST',
       body: fd
@@ -703,50 +697,32 @@ async function loadBackendData() {
 
     if (json.success) {
 
-      // 🔒 jangan timpa expenses saat admin terbuka
-      if (currentView !== 'admin') {
-        expenses = json.data.expenses || [];
-      }
+  // 🔒 JANGAN TIMPA expenses SAAT MODE ADMIN
+  if (currentView !== 'admin') {
+    expenses = json.data.expenses || [];
+  }
 
-      cashiers = json.data.cashiers || [];
+  cashiers = json.data.cashiers || [];
+  if (navigator.onLine && json.data.shiftHistory) {
+  shiftHistory = json.data.shiftHistory;
+}
 
-      if (navigator.onLine && json.data.shiftHistory) {
-        shiftHistory = json.data.shiftHistory;
-      }
+if (navigator.onLine && json.data.shiftData) {
+  shiftData = json.data.shiftData;
+}
 
-      if (navigator.onLine && json.data.shiftData) {
-        shiftData = json.data.shiftData;
-      }
+   // 🔥 AUTO RESTORE SHIFT
+const restored = restoreOpenShift();
 
-      // 🔥 AUTO RESTORE SHIFT
-      const restored = restoreOpenShift();
-
-      if (restored) {
-
-        // ⛔ jangan render ulang jika sedang di admin
-        if (currentView !== 'admin') {
-          renderCurrentView();
-        }
-
-        window.__loadingBackend = false;
-        return;
-      }
-
-      // ⛔ admin jangan render ulang saat sync
-      if (currentView !== 'admin') {
-        renderCurrentView();
-      }
-
-    }
-
+if (restored) {
+  renderCurrentView();
+  return;
+}
+     
+  renderCurrentView(); // update UI tanpa reload
+}
   } catch (err) {
-
     console.error('Backend load failed', err);
-
-  } finally {
-
-    window.__loadingBackend = false;
-
   }
 }
 
@@ -800,24 +776,12 @@ function renderCurrentView() {
   // ADMIN (FINAL – STABIL)
   // =====================
  if (currentView === 'admin') {
-
-  // 🔒 cegah render admin berulang saat sync
-  if (window.__renderingAdmin) return;
-  window.__renderingAdmin = true;
-
-  // reset status admin siap
-  window.__adminReady = false;
-
   // 1️⃣ render awal (UI langsung tampil)
   app.innerHTML = renderAdminScreen();
+requestAnimationFrame(() => {
+  initExpenseSuggestion();
+});
 
-  requestAnimationFrame(() => {
-    initExpenseSuggestion();
-  });
-
-  window.__renderingAdmin = false;
-
-  
   if (!adminDataReady) {
 
     // ===============================
@@ -848,31 +812,24 @@ function renderCurrentView() {
       loadAllExpensesForAdmin(),
       loadBackendData()
     ])
-  .then(() => {
+      .then(() => {
+        normalizeExpenses();
+        adminDataReady = true;
 
-  normalizeExpenses();
-  adminDataReady = true;
+        // 2️⃣ render ulang admin screen SETELAH data siap
+        app.innerHTML = renderAdminScreen();
 
-  // 🔄 render ulang admin screen HANYA sekali untuk inisialisasi
-  if (currentView === 'admin' && !window.__adminReady) {
-    app.innerHTML = renderAdminScreen();
+        // 3️⃣ trigger grafik HANYA jika multi-day
+        const todayISO = safeISODate(new Date())?.split('T')[0];
+        const startDate = selectedPeriodStart || todayISO;
+        const endDate = selectedPeriodEnd || todayISO;
 
-    // tandai admin sudah siap agar tidak dirender ulang lagi
-    window.__adminReady = true;
-  }
-
-  // 3️⃣ trigger grafik HANYA jika multi-day
-  const todayISO = safeISODate(new Date())?.split('T')[0];
-  const startDate = selectedPeriodStart || todayISO;
-  const endDate = selectedPeriodEnd || todayISO;
-
-  if (startDate && endDate && startDate !== endDate) {
-    requestAnimationFrame(() => {
-      createChart();
-    });
-  }
-
-})
+        if (startDate && endDate && startDate !== endDate) {
+          requestAnimationFrame(() => {
+            createChart();
+          });
+        }
+      })
       .catch(() => {
         // fallback aman (misal koneksi putus mendadak)
         normalizeExpenses();
