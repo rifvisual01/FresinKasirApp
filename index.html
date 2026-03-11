@@ -2708,21 +2708,36 @@ async function addExpense() {
     createdAt:  safeISODate(new Date()),
   };
 
-  // =========================
-  // 1️⃣ UI-FIRST (OPTIMISTIC)
-  // =========================
-  expenses.push(expense);
+// =========================
+// 1️⃣ UI-FIRST (OPTIMISTIC)
+// =========================
+expenses.push(expense);
+
+// 🔄 update UI tanpa merusak admin state
+if (currentView === 'admin') {
+  normalizeExpenses();
+
+  const app = document.getElementById('app');
+  app.innerHTML = renderAdminScreen();
+
+  requestAnimationFrame(() => {
+    createChart?.();
+  });
+
+} else {
   renderCurrentView();
+}
 
-  // reset form
-  document.getElementById('expenseName').value = '';
-  document.getElementById('expenseAmount').value = '';
-  document.getElementById('expenseCategory').value = '';
+// reset form
+document.getElementById('expenseName').value = '';
+document.getElementById('expenseAmount').value = '';
+document.getElementById('expenseCategory').value = '';
 
-  // =========================
-  // 2️⃣ SELALU MASUK QUEUE
-  // =========================
-  await saveToQueue({
+
+// =========================
+// 2️⃣ SELALU MASUK QUEUE
+// =========================
+await saveToQueue({
   id: 'addExpense-' + expenseId,
   payload: {
     action: 'addExpense',
