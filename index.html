@@ -808,10 +808,9 @@ requestAnimationFrame(() => {
     // ===============================
     // 🌐 ONLINE MODE → FETCH NORMAL
     // ===============================
-    Promise.all([
-      loadAllExpensesForAdmin(),
-      loadBackendData()
-    ])
+   Promise.all([
+  loadAllExpensesForAdmin()
+])
       .then(() => {
         normalizeExpenses();
         adminDataReady = true;
