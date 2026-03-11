@@ -801,17 +801,22 @@ function renderCurrentView() {
   // =====================
  if (currentView === 'admin') {
 
-  // 🔒 GUARD: cegah render admin berulang saat sync
+  // 🔒 cegah render admin berulang saat sync
   if (window.__renderingAdmin) return;
   window.__renderingAdmin = true;
-  
+
+  // reset status admin siap
+  window.__adminReady = false;
+
   // 1️⃣ render awal (UI langsung tampil)
   app.innerHTML = renderAdminScreen();
-requestAnimationFrame(() => {
-  initExpenseSuggestion();
-});
-  
-window.__renderingAdmin = false;
+
+  requestAnimationFrame(() => {
+    initExpenseSuggestion();
+  });
+
+  window.__renderingAdmin = false;
+}
   
   if (!adminDataReady) {
 
@@ -843,23 +848,17 @@ window.__renderingAdmin = false;
       loadAllExpensesForAdmin(),
       loadBackendData()
     ])
-      .then(() => {
+  .then(() => {
 
   normalizeExpenses();
   adminDataReady = true;
 
-  // 🔄 JANGAN render ulang seluruh admin screen
-  // cukup update bagian laporan / summary saja
-  if (currentView === 'admin') {
+  // 🔄 render ulang admin screen HANYA sekali untuk inisialisasi
+  if (currentView === 'admin' && !window.__adminReady) {
+    app.innerHTML = renderAdminScreen();
 
-    if (typeof renderAdminReport === 'function') {
-      renderAdminReport();
-    }
-
-    if (typeof renderAdminSummary === 'function') {
-      renderAdminSummary();
-    }
-
+    // tandai admin sudah siap agar tidak dirender ulang lagi
+    window.__adminReady = true;
   }
 
   // 3️⃣ trigger grafik HANYA jika multi-day
