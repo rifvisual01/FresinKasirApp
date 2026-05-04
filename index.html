@@ -258,18 +258,33 @@
         }
     </style>
   <style>@view-transition { navigation: auto; }</style>
-
-  <style>
+<style>
 /* =========================================
-   🔵 GLOBAL COLOR OVERRIDE (RED → BLUE)
+   🔵 FULL BLUE THEME OVERRIDE (SOLID)
    ========================================= */
 
-/* Gradient utama */
-.gradient-primary {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+/* 🎯 ROOT COLOR */
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-soft: #dbeafe;
 }
 
-/* Background merah */
+/* =========================================
+   🔥 GRADIENT UTAMA (HEADER & BUTTON)
+   ========================================= */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+}
+
+/* =========================================
+   🔴 SEMUA BACKGROUND RED → BLUE
+   ========================================= */
+[class*="bg-red"] {
+  background-color: var(--primary) !important;
+}
+
+/* Leveling warna */
 .bg-red-50    { background-color: #eff6ff !important; }
 .bg-red-100   { background-color: #dbeafe !important; }
 .bg-red-200   { background-color: #bfdbfe !important; }
@@ -281,38 +296,76 @@
 .bg-red-800   { background-color: #1e40af !important; }
 .bg-red-900   { background-color: #1e3a8a !important; }
 
-/* Text merah */
-.text-red-50  { color: #eff6ff !important; }
-.text-red-100 { color: #dbeafe !important; }
-.text-red-200 { color: #bfdbfe !important; }
-.text-red-300 { color: #93c5fd !important; }
-.text-red-400 { color: #60a5fa !important; }
-.text-red-500 { color: #3b82f6 !important; }
-.text-red-600 { color: #2563eb !important; }
-.text-red-700 { color: #1d4ed8 !important; }
-.text-red-800 { color: #1e40af !important; }
-.text-red-900 { color: #1e3a8a !important; }
+/* =========================================
+   🔴 TEXT RED → BLUE
+   ========================================= */
+[class*="text-red"] {
+  color: var(--primary) !important;
+}
 
-/* Border merah */
-.border-red-100 { border-color: #dbeafe !important; }
-.border-red-200 { border-color: #bfdbfe !important; }
-.border-red-300 { border-color: #93c5fd !important; }
-.border-red-400 { border-color: #60a5fa !important; }
-.border-red-500 { border-color: #3b82f6 !important; }
-.border-red-600 { border-color: #2563eb !important; }
+/* =========================================
+   🔴 BORDER RED → BLUE
+   ========================================= */
+[class*="border-red"] {
+  border-color: var(--primary) !important;
+}
 
-/* Hover fix */
-.hover\:bg-red-100:hover { background-color: #dbeafe !important; }
-.hover\:bg-red-50:hover  { background-color: #eff6ff !important; }
-
-/* Shadow glow merah → biru */
+/* =========================================
+   🔥 SHADOW RED → BLUE
+   ========================================= */
 .shadow-red-500\/50 {
   box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.5) !important;
 }
 
-/* Background utama body */
+/* =========================================
+   🔥 GLASS EFFECT FIX (BIAR MATCH)
+   ========================================= */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* =========================================
+   🔥 HEADER BACKGROUND FIX (YANG MASIH MERAH)
+   ========================================= */
+[style*="linear-gradient(135deg, #dc2626"] {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+}
+
+/* =========================================
+   🔥 BUTTON HOVER FIX
+   ========================================= */
+.hover\:bg-red-100:hover {
+  background-color: #dbeafe !important;
+}
+
+/* =========================================
+   🔥 BODY BACKGROUND
+   ========================================= */
 body {
-  background-color: rgba(37, 99, 235, 0.15) !important;
+  background-color: rgba(37, 99, 235, 0.12) !important;
+}
+
+/* =========================================
+   🔥 BADGE FIX (MERAH → BLUE)
+   ========================================= */
+.bg-red-100.text-red-700 {
+  background-color: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+/* =========================================
+   🔥 SPECIAL FIX: SVG ICON (kadang merah)
+   ========================================= */
+.text-red-600 svg,
+.text-red-500 svg {
+  stroke: var(--primary) !important;
+}
+
+/* =========================================
+   🔥 FORCE CLEAN (LAST LAYER)
+   ========================================= */
+* {
+  --tw-shadow-color: rgba(37, 99, 235, 0.4) !important;
 }
 </style>
  </head>
