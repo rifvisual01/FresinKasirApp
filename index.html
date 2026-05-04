@@ -260,112 +260,142 @@
   <style>@view-transition { navigation: auto; }</style>
 <style>
 /* =========================================
-   🔵 FULL BLUE THEME OVERRIDE (SOLID)
+   🌌 NAVY THEME (DEEP & CLEAN)
    ========================================= */
 
-/* 🎯 ROOT COLOR */
 :root {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-soft: #dbeafe;
+  --navy: #0f172a;
+  --navy-soft: #1e293b;
+  --navy-light: #334155;
+
+  --blue: #2563eb;
+  --blue-light: #3b82f6;
+
+  --card: #ffffff;
 }
 
 /* =========================================
-   🔥 GRADIENT UTAMA (HEADER & BUTTON)
+   🔥 BODY (BACKGROUND UTAMA)
+   ========================================= */
+body {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+}
+
+/* =========================================
+   🔥 HEADER / PRIMARY AREA
    ========================================= */
 .gradient-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
 }
 
 /* =========================================
-   🔴 SEMUA BACKGROUND RED → BLUE
-   ========================================= */
-[class*="bg-red"] {
-  background-color: var(--primary) !important;
-}
-
-/* Leveling warna */
-.bg-red-50    { background-color: #eff6ff !important; }
-.bg-red-100   { background-color: #dbeafe !important; }
-.bg-red-200   { background-color: #bfdbfe !important; }
-.bg-red-300   { background-color: #93c5fd !important; }
-.bg-red-400   { background-color: #60a5fa !important; }
-.bg-red-500   { background-color: #3b82f6 !important; }
-.bg-red-600   { background-color: #2563eb !important; }
-.bg-red-700   { background-color: #1d4ed8 !important; }
-.bg-red-800   { background-color: #1e40af !important; }
-.bg-red-900   { background-color: #1e3a8a !important; }
-
-/* =========================================
-   🔴 TEXT RED → BLUE
-   ========================================= */
-[class*="text-red"] {
-  color: var(--primary) !important;
-}
-
-/* =========================================
-   🔴 BORDER RED → BLUE
-   ========================================= */
-[class*="border-red"] {
-  border-color: var(--primary) !important;
-}
-
-/* =========================================
-   🔥 SHADOW RED → BLUE
-   ========================================= */
-.shadow-red-500\/50 {
-  box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.5) !important;
-}
-
-/* =========================================
-   🔥 GLASS EFFECT FIX (BIAR MATCH)
+   🔥 CARD (BIAR KONTRAS)
    ========================================= */
 .glass-effect {
-  background: rgba(255, 255, 255, 0.92) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
 }
 
 /* =========================================
-   🔥 HEADER BACKGROUND FIX (YANG MASIH MERAH)
+   🔥 CARD SHADOW (BIAR NGANGKAT)
    ========================================= */
-[style*="linear-gradient(135deg, #dc2626"] {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+.card-modern {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
 }
 
 /* =========================================
-   🔥 BUTTON HOVER FIX
+   🔥 BUTTON PRIMARY
+   ========================================= */
+.gradient-primary,
+button.gradient-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  color: white !important;
+}
+
+/* =========================================
+   🔥 INPUT FIELD
+   ========================================= */
+.input-modern {
+  background: #f8fafc !important;
+  border: 2px solid #e2e8f0 !important;
+}
+
+.input-modern:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* =========================================
+   🔥 TEXT RED → BLUE
+   ========================================= */
+.text-red-600,
+.text-red-700 {
+  color: #2563eb !important;
+}
+
+/* =========================================
+   🔥 BADGE MERAH → BLUE SOFT
+   ========================================= */
+.bg-red-100.text-red-700 {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+/* =========================================
+   🔥 BACKGROUND RED → NAVY/BLUE
+   ========================================= */
+.bg-red-600 { background-color: #2563eb !important; }
+.bg-red-700 { background-color: #1d4ed8 !important; }
+.bg-red-800 { background-color: #1e3a8a !important; }
+
+/* =========================================
+   🔥 SECTION SHIFT (BIAR TIDAK FLAT)
+   ========================================= */
+.bg-red-700.rounded-xl {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb) !important;
+}
+
+/* =========================================
+   🔥 HOVER FIX
    ========================================= */
 .hover\:bg-red-100:hover {
   background-color: #dbeafe !important;
 }
 
 /* =========================================
-   🔥 BODY BACKGROUND
+   🔥 ICON FIX
    ========================================= */
-body {
-  background-color: rgba(37, 99, 235, 0.12) !important;
+.text-red-600 svg {
+  stroke: #2563eb !important;
 }
 
 /* =========================================
-   🔥 BADGE FIX (MERAH → BLUE)
+   🔥 SPECIAL FIX: HEADER INLINE STYLE
    ========================================= */
-.bg-red-100.text-red-700 {
-  background-color: #dbeafe !important;
-  color: #1d4ed8 !important;
+[style*="linear-gradient(135deg, #dc2626"] {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb) !important;
 }
 
 /* =========================================
-   🔥 SPECIAL FIX: SVG ICON (kadang merah)
+   🔥 DEPTH FIX (BIAR TIDAK NGE-BLEND)
    ========================================= */
-.text-red-600 svg,
-.text-red-500 svg {
-  stroke: var(--primary) !important;
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+.bg-white\/20 {
+  background-color: rgba(255,255,255,0.15) !important;
+}
+
+.bg-white\/10 {
+  background-color: rgba(255,255,255,0.08) !important;
 }
 
 /* =========================================
-   🔥 FORCE CLEAN (LAST LAYER)
+   🔥 BORDER SOFT
    ========================================= */
-* {
-  --tw-shadow-color: rgba(37, 99, 235, 0.4) !important;
+.border-gray-200 {
+  border-color: #e2e8f0 !important;
 }
 </style>
  </head>
