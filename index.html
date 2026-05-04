@@ -258,6 +258,63 @@
         }
     </style>
   <style>@view-transition { navigation: auto; }</style>
+
+  <style>
+/* =========================================
+   🔵 GLOBAL COLOR OVERRIDE (RED → BLUE)
+   ========================================= */
+
+/* Gradient utama */
+.gradient-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+}
+
+/* Background merah */
+.bg-red-50    { background-color: #eff6ff !important; }
+.bg-red-100   { background-color: #dbeafe !important; }
+.bg-red-200   { background-color: #bfdbfe !important; }
+.bg-red-300   { background-color: #93c5fd !important; }
+.bg-red-400   { background-color: #60a5fa !important; }
+.bg-red-500   { background-color: #3b82f6 !important; }
+.bg-red-600   { background-color: #2563eb !important; }
+.bg-red-700   { background-color: #1d4ed8 !important; }
+.bg-red-800   { background-color: #1e40af !important; }
+.bg-red-900   { background-color: #1e3a8a !important; }
+
+/* Text merah */
+.text-red-50  { color: #eff6ff !important; }
+.text-red-100 { color: #dbeafe !important; }
+.text-red-200 { color: #bfdbfe !important; }
+.text-red-300 { color: #93c5fd !important; }
+.text-red-400 { color: #60a5fa !important; }
+.text-red-500 { color: #3b82f6 !important; }
+.text-red-600 { color: #2563eb !important; }
+.text-red-700 { color: #1d4ed8 !important; }
+.text-red-800 { color: #1e40af !important; }
+.text-red-900 { color: #1e3a8a !important; }
+
+/* Border merah */
+.border-red-100 { border-color: #dbeafe !important; }
+.border-red-200 { border-color: #bfdbfe !important; }
+.border-red-300 { border-color: #93c5fd !important; }
+.border-red-400 { border-color: #60a5fa !important; }
+.border-red-500 { border-color: #3b82f6 !important; }
+.border-red-600 { border-color: #2563eb !important; }
+
+/* Hover fix */
+.hover\:bg-red-100:hover { background-color: #dbeafe !important; }
+.hover\:bg-red-50:hover  { background-color: #eff6ff !important; }
+
+/* Shadow glow merah → biru */
+.shadow-red-500\/50 {
+  box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.5) !important;
+}
+
+/* Background utama body */
+body {
+  background-color: rgba(37, 99, 235, 0.15) !important;
+}
+</style>
  </head>
  <body class="h-full bg-red-600/50 overflow-auto">
   <div id="app" class="min-h-full"></div>
