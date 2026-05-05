@@ -413,28 +413,54 @@ button.bg-white {
 }
 
 /* =========================================
-   🔷 FORCE FIX HEADER SHIFT (PRESISI)
+   🔷 HEADER SHIFT - FULL REBUILD STYLE
    ========================================= */
 
-/* target semua container putih BESAR di atas */
-div.bg-white.rounded-3xl:first-of-type {
-  background: rgba(255,255,255,0.08) !important;
-  border: 1px solid rgba(255,255,255,0.15) !important;
+/* 1. CONTAINER HEADER */
+.bg-white.rounded-3xl {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
   backdrop-filter: blur(10px);
 }
 
-/* teks di dalam header */
-div.bg-white.rounded-3xl:first-of-type h1,
-div.bg-white.rounded-3xl:first-of-type h2,
-div.bg-white.rounded-3xl:first-of-type span {
+/* 2. JUDUL "Kasir Shift" */
+.bg-white.rounded-3xl h1,
+.bg-white.rounded-3xl h2 {
+  color: #93c5fd !important; /* biru terang */
+  font-weight: 700;
+}
+
+/* 3. CHIP (NAMA & JAM) */
+.bg-white.rounded-3xl .bg-white {
+  background: rgba(255,255,255,0.08) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
   color: white !important;
 }
 
-/* icon di header */
-div.bg-white.rounded-3xl:first-of-type svg {
+/* icon dalam chip */
+.bg-white.rounded-3xl .bg-white svg {
   stroke: white !important;
 }
- 
+
+/* 4. BUTTON TUTUP SHIFT */
+.bg-white.rounded-3xl button {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  color: white !important;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(37,99,235,0.4);
+}
+
+/* hover button */
+.bg-white.rounded-3xl button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(37,99,235,0.5);
+}
+
+/* 5. TEXT UMUM DALAM HEADER */
+.bg-white.rounded-3xl span,
+.bg-white.rounded-3xl p {
+  color: rgba(255,255,255,0.85) !important;
+}
 </style>
  </head>
  <body class="h-full bg-red-600/50 overflow-auto">
