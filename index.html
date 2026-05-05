@@ -263,7 +263,7 @@
    🌌 GLOBAL BACKGROUND (SOLID NAVY)
    ========================================= */
 :root {
-  --navy: #0f172a;
+  --navy: #1e3a8a; /* update ke navy baru */
   --blue: #2563eb;
   --blue-strong: #1d4ed8;
   --blue-soft: #3b82f6;
@@ -274,7 +274,7 @@
 
 /* background utama semua halaman */
 body {
-  background: #0f172a !important;
+  background: #1e3a8a !important;
 }
 
 /* override tailwind merah bawaan */
@@ -282,11 +282,19 @@ body {
   background-color: transparent !important;
 }
 
+/* pastikan container tidak nutup background */
+#app {
+  background: transparent !important;
+}
+
+.min-h-screen {
+  background: transparent !important;
+}
 /* =========================================
    🔷 HEADER (TETAP BIRU, TANPA DIUBAH TOTAL)
    ========================================= */
 .gradient-primary {
-  background: #1e293b !important;
+  background: #1e3a8a !important;
 }
 /* =========================================
    🔳 CARD PUTIH (BIAR KONTRAS)
