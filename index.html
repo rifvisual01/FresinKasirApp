@@ -260,10 +260,10 @@
   <style>@view-transition { navigation: auto; }</style>
 <style>
 /* =========================================
-   🌌 GLOBAL BACKGROUND (SOLID NAVY)
+   🌌 GLOBAL SYSTEM (NAVY BASE)
    ========================================= */
 :root {
-  --navy: #1e3a8a; /* update ke navy baru */
+  --navy: #1e3a8a;
   --blue: #2563eb;
   --blue-strong: #1d4ed8;
   --blue-soft: #3b82f6;
@@ -272,48 +272,51 @@
   --white-border: rgba(255,255,255,0.25);
 }
 
-/* background utama semua halaman */
-body {
-  background: #1e3a8a !important;
+/* =========================================
+   🌌 FORCE BACKGROUND (SEMUA HALAMAN)
+   ========================================= */
+html, body {
+  background-color: var(--navy) !important;
 }
 
-/* override tailwind merah bawaan */
-.bg-red-600\/50 {
+/* hilangkan semua background bawaan */
+.bg-red-600\/50,
+.bg-gray-50,
+.bg-gray-100,
+.bg-gray-200,
+.bg-white {
   background-color: transparent !important;
 }
 
-/* pastikan container tidak nutup background */
-#app {
+/* container utama */
+#app,
+.min-h-screen,
+.h-screen {
   background: transparent !important;
 }
 
-.min-h-screen {
-  background: transparent !important;
-}
 /* =========================================
-   🔷 HEADER (TETAP BIRU, TANPA DIUBAH TOTAL)
+   🔷 HEADER
    ========================================= */
 .gradient-primary {
-  background: #1e3a8a !important;
-}
-/* =========================================
-   🔳 CARD PUTIH (BIAR KONTRAS)
-   ========================================= */
-.glass-effect {
-  background: #ffffff !important;
-  backdrop-filter: none !important;
+  background: var(--navy) !important;
 }
 
 /* =========================================
-   🔥 SHADOW (BIAR CARD NGANGKAT)
+   🔳 CARD PUTIH (KONTRAS)
    ========================================= */
+.card-modern,
+.glass-effect {
+  background: #ffffff !important;
+}
+
+/* shadow biar ngangkat */
 .card-modern {
   box-shadow: 0 25px 60px rgba(0,0,0,0.35) !important;
 }
 
 /* =========================================
-   🔘 CHIP (NAMA KASIR & JAM)
-   → OUTLINE GLASS (TIDAK PUTIH SOLID)
+   🔘 CHIP (KASIR & JAM)
    ========================================= */
 .badge-modern,
 .gradient-primary .badge-modern {
@@ -323,13 +326,12 @@ body {
   backdrop-filter: blur(6px);
 }
 
-/* icon di dalam chip */
 .badge-modern svg {
   stroke: white !important;
 }
 
 /* =========================================
-   🔘 BUTTON PUTIH (TUTUP SHIFT)
+   🔘 BUTTON PUTIH
    ========================================= */
 button.bg-white {
   background: rgba(255,255,255,0.9) !important;
@@ -338,37 +340,31 @@ button.bg-white {
 }
 
 /* =========================================
-   🔵 KAS AWAL (LEBIH SOFT)
+   🔵 KAS AWAL & PENGELUARAN
    ========================================= */
 .bg-red-700.rounded-xl:first-child {
   background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
 }
 
-/* =========================================
-   🔵 PENGELUARAN (LEBIH STRONG)
-   ========================================= */
 .bg-red-700.rounded-xl:last-child {
   background: linear-gradient(135deg, #1d4ed8, #1e3a8a) !important;
 }
 
 /* =========================================
-   🔵 TEXT RED → BLUE
+   🔵 TEXT & BADGE
    ========================================= */
 .text-red-600,
 .text-red-700 {
   color: var(--blue) !important;
 }
 
-/* =========================================
-   🔵 BADGE MERAH → BLUE SOFT
-   ========================================= */
 .bg-red-100.text-red-700 {
   background: #dbeafe !important;
   color: var(--blue-strong) !important;
 }
 
 /* =========================================
-   🔵 INPUT FIELD
+   🔵 INPUT
    ========================================= */
 .input-modern {
   background: #f8fafc !important;
@@ -381,35 +377,32 @@ button.bg-white {
 }
 
 /* =========================================
-   🔵 HOVER FIX
+   🔵 INTERACTION
    ========================================= */
 .hover\:bg-red-100:hover {
   background-color: #dbeafe !important;
 }
 
-/* =========================================
-   🔵 BORDER FIX
-   ========================================= */
 .border-gray-200 {
   border-color: #e2e8f0 !important;
 }
 
 /* =========================================
-   🔵 INLINE STYLE MERAH (HEADER LAMA)
+   🔵 FIX INLINE STYLE MERAH
    ========================================= */
 [style*="#dc2626"] {
-  background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+  background: var(--navy) !important;
 }
 
 /* =========================================
-   🔵 ICON FIX
+   🔵 ICON
    ========================================= */
 .text-red-600 svg {
   stroke: var(--blue) !important;
 }
 
 /* =========================================
-   🔵 WHITE TRANSPARENCY FIX
+   🔵 TRANSPARANSI PUTIH
    ========================================= */
 .bg-white\/20 {
   background-color: rgba(255,255,255,0.12) !important;
