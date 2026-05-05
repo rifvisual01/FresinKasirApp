@@ -412,29 +412,26 @@ button.bg-white {
   background-color: rgba(255,255,255,0.06) !important;
 }
 
- /* =========================================
-   🔷 FIX HEADER SHIFT (HILANGKAN PUTIH)
+/* =========================================
+   🔷 FORCE FIX HEADER SHIFT (PRESISI)
    ========================================= */
 
-/* target container header (yang rounded besar di atas) */
-.bg-white.rounded-3xl,
-.bg-white.rounded-2xl {
+/* target semua container putih BESAR di atas */
+div.bg-white.rounded-3xl:first-of-type {
   background: rgba(255,255,255,0.08) !important;
   border: 1px solid rgba(255,255,255,0.15) !important;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 
-/* khusus teks di dalam header tetap kontras */
-.bg-white.rounded-3xl h1,
-.bg-white.rounded-2xl h1,
-.bg-white.rounded-3xl h2,
-.bg-white.rounded-2xl h2 {
+/* teks di dalam header */
+div.bg-white.rounded-3xl:first-of-type h1,
+div.bg-white.rounded-3xl:first-of-type h2,
+div.bg-white.rounded-3xl:first-of-type span {
   color: white !important;
 }
 
-/* icon tetap terlihat */
-.bg-white.rounded-3xl svg,
-.bg-white.rounded-2xl svg {
+/* icon di header */
+div.bg-white.rounded-3xl:first-of-type svg {
   stroke: white !important;
 }
  
