@@ -1307,38 +1307,34 @@ const shiftExpenses = expenses.filter(e =>
             <div class="flex justify-between items-center mb-4">
 
                 <!-- LEFT -->
-                <div class="flex items-center gap-4">
+               <div class="flex items-center gap-3">
 
-                    <!-- JUDUL -->
-                    <h2 class="text-3xl font-black text-blue-200">
-                        ${shiftLabel}
-                    </h2>
+    <h2 class="text-3xl font-black text-white">
+        ${shiftLabel}
+    </h2>
 
-                    <!-- NAMA KASIR -->
-                    <span class="bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold shadow">
-                        👤 ${currentCashier || shiftInfo.cashier}
-                    </span>
+    <span class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm flex items-center gap-1">
+        👤 ${currentCashier || shiftInfo.cashier}
+    </span>
 
-                    <!-- JAM -->
-                    <span class="bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold shadow">
-                        🕐 ${
-                          shiftInfo.openedAt 
-                          ? new Date(shiftInfo.openedAt).toLocaleTimeString('id-ID', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            }) 
-                          : '--:--'
-                        }
-                    </span>
+    <span class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm flex items-center gap-1">
+        🕐 ${
+          shiftInfo.openedAt 
+          ? new Date(shiftInfo.openedAt).toLocaleTimeString('id-ID', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }) 
+          : '--:--'
+        }
+    </span>
 
-                </div>
+</div>
 
-                <!-- BUTTON -->
-                <button 
-                    onclick="closeShift()" 
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-all">
-                    Tutup Shift
-                </button>
+<button 
+    onclick="closeShift()" 
+    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-lg font-semibold shadow transition-all">
+    Tutup Shift
+</button>
 
             </div>
 
