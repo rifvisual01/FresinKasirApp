@@ -196,9 +196,14 @@
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
-        
+
    .gradient-primary {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(
+    135deg,
+    #3b82f6 0%,   /* biru terang */
+    #2563eb 50%,  /* mid */
+    #1e3a8a 100%  /* biru gelap */
+  ) !important;
 }
         
         .glass-effect {
@@ -1299,67 +1304,68 @@ const shiftExpenses = expenses.filter(e =>
             
             return `
 <div class="min-h-full p-6">
-    <div class="max-w-6xl mx-auto">
+  <div class="max-w-6xl mx-auto">
 
-        <!-- HEADER -->
-        <div class="gradient-primary card-modern rounded-3xl p-6 mb-6">
+    <div class="gradient-primary card-modern rounded-3xl p-6 mb-6">
 
-            <div class="flex justify-between items-center mb-4">
+      <div class="flex justify-between items-center mb-4">
 
-                <!-- LEFT -->
-               <div class="flex items-center gap-3">
+        <div class="flex items-center gap-4">
 
-    <h2 class="text-3xl font-black text-white">
-        ${shiftLabel}
-    </h2>
+          <!-- JUDUL (TETAP PUTIH) -->
+          <h2 class="text-3xl font-black text-white">
+            ${shiftLabel}
+          </h2>
 
-    <span class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm flex items-center gap-1">
-        👤 ${currentCashier || shiftInfo.cashier}
-    </span>
+          <!-- NAMA KASIR (GANTI WARNA SAJA) -->
+          <span class="badge-modern bg-blue-600 text-white border border-blue-500">
+            👤 ${currentCashier || shiftInfo.cashier}
+          </span>
 
-    <span class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm flex items-center gap-1">
-        🕐 ${
-          shiftInfo.openedAt 
-          ? new Date(shiftInfo.openedAt).toLocaleTimeString('id-ID', {
-              hour: '2-digit',
-              minute: '2-digit'
-            }) 
-          : '--:--'
-        }
-    </span>
-
-</div>
-
-<button 
-    onclick="closeShift()" 
-    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-lg font-semibold shadow transition-all">
-    Tutup Shift
-</button>
-
-            </div>
-
-            <!-- INFO CARD -->
-            <div class="grid grid-cols-2 gap-4">
-
-                <!-- KAS AWAL -->
-                <div class="bg-blue-500 rounded-xl p-6 text-white text-center">
-                    <p class="text-sm md:text-base font-bold mb-2">💰 Kas Awal</p>
-                    <p class="text-2xl md:text-3xl lg:text-4xl font-black">
-                        Rp ${shiftInfo.startCash.toLocaleString('id-ID')}
-                    </p>
-                </div>
-
-                <!-- PENGELUARAN -->
-                <div class="bg-blue-700 rounded-xl p-6 text-white text-center">
-                    <p class="text-sm md:text-base font-bold mb-2">📊 Pengeluaran</p>
-                    <p class="text-2xl md:text-3xl lg:text-4xl font-black">
-                        Rp ${totalExpense.toLocaleString('id-ID')}
-                    </p>
-                </div>
-
-            </div>
+          <!-- JAM (GANTI WARNA SAJA) -->
+          <span class="badge-modern bg-blue-600 text-white border border-blue-500">
+            🕐 ${
+              shiftInfo.openedAt 
+              ? new Date(shiftInfo.openedAt).toLocaleTimeString('id-ID', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) 
+              : '--:--'
+            }
+          </span>
 
         </div>
+
+        <!-- BUTTON (GANTI WARNA SAJA) -->
+        <button 
+          onclick="closeShift()" 
+          class="bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-xl font-bold shadow-lg transition-all">
+          Tutup Shift
+        </button>
+
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+
+        <!-- KAS AWAL -->
+        <div class="bg-blue-500 rounded-xl p-6 text-white text-center">
+          <p class="text-sm md:text-base font-bold mb-2">💰 Kas Awal</p>
+          <p class="text-2xl md:text-3xl lg:text-4xl font-black">
+            Rp ${shiftInfo.startCash.toLocaleString('id-ID')}
+          </p>
+        </div>
+
+        <!-- PENGELUARAN -->
+        <div class="bg-blue-700 rounded-xl p-6 text-white text-center">
+          <p class="text-sm md:text-base font-bold mb-2">📊 Pengeluaran</p>
+          <p class="text-2xl md:text-3xl lg:text-4xl font-black">
+            Rp ${totalExpense.toLocaleString('id-ID')}
+          </p>
+        </div>
+
+      </div>
+
+    </div>
                         <div class="glass-effect card-modern rounded-3xl p-8 mb-6">
                             <h3 class="text-2xl font-black text-gray-800 mb-6">➕ Tambah Pengeluaran</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
