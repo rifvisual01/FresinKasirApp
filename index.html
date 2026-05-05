@@ -260,60 +260,115 @@
   <style>@view-transition { navigation: auto; }</style>
 <style>
 /* =========================================
-   🌌 NAVY THEME (DEEP & CLEAN)
+   🌌 NAVY SYSTEM (GLOBAL BACKGROUND)
    ========================================= */
-
 :root {
   --navy: #0f172a;
   --navy-soft: #1e293b;
   --navy-light: #334155;
 
   --blue: #2563eb;
-  --blue-light: #3b82f6;
+  --blue-strong: #1d4ed8;
+  --blue-soft: #3b82f6;
 
-  --card: #ffffff;
+  --white-glass: rgba(255,255,255,0.08);
+  --white-border: rgba(255,255,255,0.25);
 }
 
 /* =========================================
-   🔥 BODY (BACKGROUND UTAMA)
+   🔥 BACKGROUND GLOBAL (SEMUA HALAMAN)
    ========================================= */
 body {
-  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+  background: linear-gradient(
+    180deg,
+    #1e3a8a 0%,
+    #1d4ed8 40%,
+    #0f172a 100%
+  ) !important;
 }
 
 /* =========================================
-   🔥 HEADER / PRIMARY AREA
+   🔷 HEADER UTAMA (HOME & SHIFT)
    ========================================= */
 .gradient-primary {
-  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
 }
 
 /* =========================================
-   🔥 CARD (BIAR KONTRAS)
+   🔳 CARD (PUTIH KONTRAS)
    ========================================= */
 .glass-effect {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(10px);
+  background: #ffffff !important;
+  backdrop-filter: none !important;
 }
 
 /* =========================================
-   🔥 CARD SHADOW (BIAR NGANGKAT)
+   🔥 CARD SHADOW (DEPTH)
    ========================================= */
 .card-modern {
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.25) !important;
 }
 
 /* =========================================
-   🔥 BUTTON PRIMARY
+   🔘 CHIP (KASIR & JAM) → OUTLINE GLASS
    ========================================= */
-.gradient-primary,
-button.gradient-primary {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+.badge-modern,
+.gradient-primary .badge-modern {
+  background: var(--white-glass) !important;
+  border: 1px solid var(--white-border) !important;
   color: white !important;
+  backdrop-filter: blur(6px);
 }
 
 /* =========================================
-   🔥 INPUT FIELD
+   🔘 CHIP ICON FIX
+   ========================================= */
+.badge-modern svg {
+  color: white !important;
+  stroke: white !important;
+}
+
+/* =========================================
+   🔘 BUTTON PUTIH (TUTUP SHIFT)
+   ========================================= */
+button.bg-white {
+  background: rgba(255,255,255,0.9) !important;
+  color: #1d4ed8 !important;
+  font-weight: 700;
+}
+
+/* =========================================
+   🔵 KAS AWAL (SOFT BLUE)
+   ========================================= */
+.bg-red-700.rounded-xl:first-child {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
+
+/* =========================================
+   🔵 PENGELUARAN (STRONG BLUE)
+   ========================================= */
+.bg-red-700.rounded-xl:last-child {
+  background: linear-gradient(135deg, #1d4ed8, #1e3a8a) !important;
+}
+
+/* =========================================
+   🔵 TEXT RED → BLUE
+   ========================================= */
+.text-red-600,
+.text-red-700 {
+  color: #2563eb !important;
+}
+
+/* =========================================
+   🔵 BADGE MERAH → BLUE SOFT
+   ========================================= */
+.bg-red-100.text-red-700 {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+/* =========================================
+   🔵 INPUT FIELD
    ========================================= */
 .input-modern {
   background: #f8fafc !important;
@@ -326,76 +381,42 @@ button.gradient-primary {
 }
 
 /* =========================================
-   🔥 TEXT RED → BLUE
-   ========================================= */
-.text-red-600,
-.text-red-700 {
-  color: #2563eb !important;
-}
-
-/* =========================================
-   🔥 BADGE MERAH → BLUE SOFT
-   ========================================= */
-.bg-red-100.text-red-700 {
-  background: #dbeafe !important;
-  color: #1d4ed8 !important;
-}
-
-/* =========================================
-   🔥 BACKGROUND RED → NAVY/BLUE
-   ========================================= */
-.bg-red-600 { background-color: #2563eb !important; }
-.bg-red-700 { background-color: #1d4ed8 !important; }
-.bg-red-800 { background-color: #1e3a8a !important; }
-
-/* =========================================
-   🔥 SECTION SHIFT (BIAR TIDAK FLAT)
-   ========================================= */
-.bg-red-700.rounded-xl {
-  background: linear-gradient(135deg, #1e3a8a, #2563eb) !important;
-}
-
-/* =========================================
-   🔥 HOVER FIX
+   🔵 HOVER FIX
    ========================================= */
 .hover\:bg-red-100:hover {
   background-color: #dbeafe !important;
 }
 
 /* =========================================
-   🔥 ICON FIX
+   🔵 BORDER FIX
+   ========================================= */
+.border-gray-200 {
+  border-color: #e2e8f0 !important;
+}
+
+/* =========================================
+   🔵 SPECIAL FIX: INLINE RED GRADIENT
+   ========================================= */
+[style*="#dc2626"] {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+}
+
+/* =========================================
+   🔵 ICON FIX GLOBAL
    ========================================= */
 .text-red-600 svg {
   stroke: #2563eb !important;
 }
 
 /* =========================================
-   🔥 SPECIAL FIX: HEADER INLINE STYLE
+   🔵 WHITE TRANSPARENCY FIX
    ========================================= */
-[style*="linear-gradient(135deg, #dc2626"] {
-  background: linear-gradient(135deg, #1e3a8a, #2563eb) !important;
-}
-
-/* =========================================
-   🔥 DEPTH FIX (BIAR TIDAK NGE-BLEND)
-   ========================================= */
-.bg-white {
-  background-color: #ffffff !important;
-}
-
 .bg-white\/20 {
-  background-color: rgba(255,255,255,0.15) !important;
+  background-color: rgba(255,255,255,0.12) !important;
 }
 
 .bg-white\/10 {
-  background-color: rgba(255,255,255,0.08) !important;
-}
-
-/* =========================================
-   🔥 BORDER SOFT
-   ========================================= */
-.border-gray-200 {
-  border-color: #e2e8f0 !important;
+  background-color: rgba(255,255,255,0.06) !important;
 }
 </style>
  </head>
