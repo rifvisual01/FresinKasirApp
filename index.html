@@ -413,53 +413,42 @@ button.bg-white {
 }
 
 /* =========================================
-   🔷 HEADER SHIFT - FULL REBUILD STYLE
+   🔥 HARD OVERRIDE HEADER SHIFT (PASTI KENA)
    ========================================= */
 
-/* 1. CONTAINER HEADER */
-.bg-white.rounded-3xl {
+/* target semua container putih besar di atas */
+div[class*="rounded-3xl"] {
   background: rgba(255,255,255,0.06) !important;
   border: 1px solid rgba(255,255,255,0.12) !important;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px) !important;
 }
 
-/* 2. JUDUL "Kasir Shift" */
-.bg-white.rounded-3xl h1,
-.bg-white.rounded-3xl h2 {
-  color: #93c5fd !important; /* biru terang */
-  font-weight: 700;
+/* pastikan teks header kebaca */
+div[class*="rounded-3xl"] h1,
+div[class*="rounded-3xl"] h2,
+div[class*="rounded-3xl"] span,
+div[class*="rounded-3xl"] p {
+  color: white !important;
 }
 
-/* 3. CHIP (NAMA & JAM) */
-.bg-white.rounded-3xl .bg-white {
+/* chip kecil (nama kasir & jam) */
+div[class*="rounded-3xl"] .bg-white {
   background: rgba(255,255,255,0.08) !important;
   border: 1px solid rgba(255,255,255,0.2) !important;
   color: white !important;
 }
 
-/* icon dalam chip */
-.bg-white.rounded-3xl .bg-white svg {
+/* icon */
+div[class*="rounded-3xl"] svg {
   stroke: white !important;
 }
 
-/* 4. BUTTON TUTUP SHIFT */
-.bg-white.rounded-3xl button {
+/* tombol tutup shift */
+div[class*="rounded-3xl"] button {
   background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
   color: white !important;
   font-weight: 600;
   box-shadow: 0 6px 20px rgba(37,99,235,0.4);
-}
-
-/* hover button */
-.bg-white.rounded-3xl button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 25px rgba(37,99,235,0.5);
-}
-
-/* 5. TEXT UMUM DALAM HEADER */
-.bg-white.rounded-3xl span,
-.bg-white.rounded-3xl p {
-  color: rgba(255,255,255,0.85) !important;
 }
 </style>
  </head>
