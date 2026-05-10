@@ -1886,7 +1886,7 @@ ${(() => {
         </span>
       </div>
 
-      <!-- BARIS 2 : INFO KAS -->
+       <!-- BARIS 2 : INFO KAS -->
       <div class="flex items-center justify-between text-sm font-semibold text-gray-700">
         <span>📥 Rp ${(s1?.startCash || 0).toLocaleString('id-ID')}</span>
         <span>📤 Rp ${(s1?.endCash || 0).toLocaleString('id-ID')}</span>
@@ -1897,6 +1897,12 @@ ${(() => {
 })()}
 
     <div class="space-y-2">
+
+      ${shift1Items.length === 0 ? `
+        <div class="text-sm text-gray-500 italic px-2 py-2">
+          Tidak ada pengeluaran
+        </div>
+      ` : ''}
       ${shift1Items.map(exp => `
         <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
   <div class="flex items-start justify-between gap-3">
@@ -1932,10 +1938,10 @@ ${(() => {
     </div>
 </div>
 ` : ''}
-${shift2Items.length > 0 ? `
+${true ? `
 <div>
 ${(() => {
-  const s2 = getLastShift('shift2');
+  const s2 = getShiftByDate('shift2', startDate, endDate);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-amber-300 border-red-300">
@@ -1969,7 +1975,14 @@ ${(() => {
 
 
     <div class="space-y-2">
-      ${shift2Items.map(exp => `
+
+  ${shift2Items.length === 0 ? `
+    <div class="text-sm text-gray-500 italic px-2 py-2">
+      Tidak ada pengeluaran
+    </div>
+  ` : ''}
+
+  ${shift2Items.map(exp => `
         <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
   <div class="flex items-start justify-between gap-3">
 
