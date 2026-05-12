@@ -2687,7 +2687,7 @@ async function loginShift() {
   const startCash = parseRupiah(document.getElementById('startCash').value);
   const shift = currentShift;
 
-  if (!shift || !cashierName || !pin || startCash <= 0) {
+  if (!shift || !cashierName || !pin || startCash < 0) {
     btn.textContent = originalText;
     btn.disabled = false;
     showNotification('Data tidak lengkap', 'warning');
