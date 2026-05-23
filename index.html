@@ -1864,7 +1864,7 @@ function renderAdminScreen() {
                                                     ${true ? `
 <div>
 ${(() => {
-  const s1 = getLastShift('shift1');
+  const s1 = getShiftByDate('shift1', startDate, endDate);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-red-300 border border-red-300">
@@ -2292,7 +2292,7 @@ categoryExpenses.forEach(exp => {
                             
                             <div class="mb-6">
 ${(() => {
-  const s1 = getLastShift('shift1'); // startDate = tanggal laporan
+  const s1 = getShiftByDate('shift1', startDate, endDate);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-red-300 border border-red-300">
@@ -2368,7 +2368,7 @@ ${shift1Expenses.length === 0 ? `
 
 <div class="mb-6">
 ${(() => {
-  const s2 = getLastShift('shift2'); // startDate = tanggal laporan
+  const s2 = getShiftByDate('shift2', startDate, endDate);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-amber-300 border border-red-300">
@@ -3421,6 +3421,31 @@ function logoutAdmin() {
     });
   }
 }
+
+
+function getShiftByDate(shiftName, startDate, endDate) {
+  if (!shiftHistory || !shiftHistory.length) return null;
+
+  return shiftHistory
+    .filter(s => {
+      if (s.shift !== shiftName) return false;
+
+      const dateSource = s.closedAt || s.openedAt || s.tanggal;
+      let date = '';
+
+      if (typeof dateSource === 'string') {
+        date = dateSource.includes('T')
+          ? dateSource.split('T')[0]
+          : dateSource.slice(0, 10);
+      }
+
+      if (!date) return false;
+
+      return date >= startDate && date <= endDate;
+    })
+    .sort((a, b) => new Date(b.closedAt || b.openedAt || 0) - new Date(a.closedAt || a.openedAt || 0))[0] || null;
+}
+
 
 function toggleChartData(type) {
   chartVisibleData[type] = !chartVisibleData[type];
