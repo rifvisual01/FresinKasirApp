@@ -1017,7 +1017,8 @@ requestAnimationFrame(() => {
     // 🌐 ONLINE MODE → FETCH NORMAL
     // ===============================
    Promise.all([
-  loadAllExpensesForAdmin()
+  loadAllExpensesForAdmin(),
+  loadShiftHistoryForAdmin()
 ])
       .then(() => {
         normalizeExpenses();
@@ -1812,6 +1813,45 @@ const lastShift1 = shiftHistory
     console.error('❌ Gagal load expenses admin', err);
   }
 }
+
+
+async function loadShiftHistoryForAdmin() {
+  if (!navigator.onLine) return;
+
+  try {
+    const fd = new FormData();
+    fd.append('action', 'getData');
+
+    const res = await fetch(API_BASE, {
+      method: 'POST',
+      body: fd
+    });
+
+    const json = await res.json();
+    if (!json.success) return;
+
+    const data = json.data || {};
+
+    if (Array.isArray(data.shiftHistory)) {
+      shiftHistory = data.shiftHistory;
+    } else if (Array.isArray(data.shift_history)) {
+      shiftHistory = data.shift_history;
+    } else if (Array.isArray(data.shifts)) {
+      shiftHistory = data.shifts;
+    } else if (Array.isArray(data.shiftSessions)) {
+      shiftHistory = data.shiftSessions;
+    }
+
+    if (data.shiftData) {
+      shiftData = data.shiftData;
+    } else if (data.shift_data) {
+      shiftData = data.shift_data;
+    }
+  } catch (err) {
+    console.warn('⚠️ Gagal load shift history admin', err);
+  }
+}
+
 
 
 function renderAdminDeleteButton(exp) {
@@ -2727,7 +2767,7 @@ categoryExpenses.forEach(exp => {
                             
                             <div class="mb-6">
 ${(() => {
-  const s1 = getShiftByDate('shift1', startDate, endDate);
+  const s1 = getShiftByDate('shift1', dateKey, dateKey);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-red-300 border border-red-300">
@@ -2806,7 +2846,7 @@ ${shift1Expenses.length === 0 ? `
 
 <div class="mb-6">
 ${(() => {
-  const s2 = getShiftByDate('shift2', startDate, endDate);
+  const s2 = getShiftByDate('shift2', dateKey, dateKey);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-amber-300 border border-red-300">
@@ -3900,8 +3940,7 @@ function normalizeShiftKey(value) {
     raw === 'shif1' ||
     raw === 'kasirshift1' ||
     raw === 'kasir1' ||
-    raw === 's1' ||
-    raw.includes('shift1')
+    raw === 's1'
   ) return 'shift1';
 
   if (
@@ -3909,13 +3948,101 @@ function normalizeShiftKey(value) {
     raw === 'shif2' ||
     raw === 'kasirshift2' ||
     raw === 'kasir2' ||
-    raw === 's2' ||
-    raw.includes('shift2')
+    raw === 's2'
   ) return 'shift2';
 
-  if (raw === 'admin' || raw.includes('admin')) return 'admin';
+  if (raw === 'admin') return 'admin';
 
   return raw;
+}
+
+function normalizeFieldName(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function getFieldValue(record, fieldNames = []) {
+  if (!record || typeof record !== 'object') return undefined;
+
+  // Prioritas 1: nama field sesuai database Google Sheet
+  for (const name of fieldNames) {
+    if (
+      Object.prototype.hasOwnProperty.call(record, name) &&
+      record[name] !== undefined &&
+      record[name] !== null &&
+      record[name] !== ''
+    ) {
+      return record[name];
+    }
+  }
+
+  // Prioritas 2: fallback beda gaya penulisan, misal cash_start vs cashStart
+  const normalizedTargets = fieldNames.map(normalizeFieldName);
+  const key = Object.keys(record).find(k =>
+    normalizedTargets.includes(normalizeFieldName(k))
+  );
+
+  if (
+    key &&
+    record[key] !== undefined &&
+    record[key] !== null &&
+    record[key] !== ''
+  ) {
+    return record[key];
+  }
+
+  return undefined;
+}
+
+function parseCashValue(value) {
+  if (value === undefined || value === null || value === '') return 0;
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  const raw = String(value).trim();
+  if (!raw) return 0;
+
+  // Aman untuk format: 717000, Rp 717.000, 717.000
+  const digitsOnly = raw.replace(/[^\d-]/g, '');
+  if (digitsOnly && /^-?\d+$/.test(digitsOnly)) {
+    return Number(digitsOnly) || 0;
+  }
+
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function getShiftStartCash(record) {
+  // Sesuai database SHIFTS: cash_start
+  return parseCashValue(getFieldValue(record, [
+    'cash_start',
+    'startCash',
+    'start_cash',
+    'cashStart',
+    'openingCash',
+    'kasAwal',
+    'kas_awal'
+  ]));
+}
+
+function getShiftEndCash(record) {
+  // Sesuai database SHIFTS: cash_end
+  return parseCashValue(getFieldValue(record, [
+    'cash_end',
+    'endCash',
+    'end_cash',
+    'cashEnd',
+    'closingCash',
+    'kasAkhir',
+    'kas_akhir'
+  ]));
+}
+
+function padDatePart(value) {
+  return String(value).padStart(2, '0');
 }
 
 function getDateKey(value) {
@@ -3933,15 +4060,19 @@ function getDateKey(value) {
   if (typeof value === 'string') {
     const v = value.trim();
 
-    if (/^\d{4}-\d{2}-\d{2}/.test(v)) {
-      const iso = safeISODate(v);
-      return iso ? iso.split('T')[0] : v.slice(0, 10);
+    // Format database SHIFTS: 2026-5-12 / 2026-05-12 / 2026-5-12 18:14
+    const ymd = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (ymd) {
+      const [, y, m, d] = ymd;
+      return `${y}-${padDatePart(m)}-${padDatePart(d)}`;
     }
 
-    const dmY = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if (dmY) {
-      const [, d, m, y] = dmY;
-      return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    // Format Google Sheet timestamp: 5/12/2026 18:14
+    // Untuk sheet ini dibaca sebagai M/D/YYYY karena contoh 5/12/2026 = 12 Mei 2026.
+    const mdy = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (mdy) {
+      const [, m, d, y] = mdy;
+      return `${y}-${padDatePart(m)}-${padDatePart(d)}`;
     }
 
     const iso = safeISODate(v);
@@ -3954,54 +4085,96 @@ function getDateKey(value) {
 function getCashierNameFromRecord(record) {
   if (!record) return '';
   return (
-    record.cashier ||
-    record.cashierName ||
-    record.cashier_name ||
-    record.kasir ||
-    record.namaKasir ||
-    record.nama_kasir ||
-    record.user ||
-    ''
+    getFieldValue(record, [
+      'cashier',
+      'kasir',
+      'cashierName',
+      'cashier_name',
+      'namaKasir',
+      'nama_kasir'
+    ]) || ''
   );
 }
 
-function shiftRecordHasDate(record, startDate, endDate) {
-  if (!record) return false;
+function getShiftOpenedAt(record) {
+  return getFieldValue(record, [
+    'opened_at',
+    'openedAt',
+    'open_at',
+    'createdAt',
+    'timestamp'
+  ]) || '';
+}
 
-  const dates = [
-    record.openedAt,
-    record.closedAt,
-    record.tanggal,
-    record.date,
-    record.createdAt,
-    record.timestamp
-  ]
-    .map(getDateKey)
-    .filter(Boolean);
+function getShiftClosedAt(record) {
+  return getFieldValue(record, [
+    'closed_at',
+    'closedAt',
+    'close_at'
+  ]) || '';
+}
 
-  if (dates.some(d => d >= startDate && d <= endDate)) return true;
+function shiftRecordDateMatches(record, targetDate) {
+  if (!record || !targetDate) return false;
 
-  const opened = getDateKey(record.openedAt);
-  const closed = getDateKey(record.closedAt);
-  if (opened && closed) {
-    return opened <= endDate && closed >= startDate;
-  }
+  // Prioritas utama: kolom tanggal dari tabel SHIFTS
+  const tanggal = getDateKey(getFieldValue(record, ['tanggal', 'date']));
+  if (tanggal) return tanggal === targetDate;
 
-  return false;
+  // Fallback jika tanggal kosong
+  const opened = getDateKey(getShiftOpenedAt(record));
+  const closed = getDateKey(getShiftClosedAt(record));
+
+  return opened === targetDate || closed === targetDate;
 }
 
 function getShiftSortTime(record) {
   const raw =
-    record?.closedAt ||
-    record?.openedAt ||
-    record?.createdAt ||
-    record?.timestamp ||
-    record?.tanggal ||
-    record?.date ||
+    getShiftClosedAt(record) ||
+    getShiftOpenedAt(record) ||
+    getFieldValue(record, ['tanggal', 'date']) ||
     0;
 
   const d = new Date(raw);
   return isNaN(d.getTime()) ? 0 : d.getTime();
+}
+
+function normalizeShiftRecord(record, shiftKey) {
+  if (!record) return null;
+
+  return {
+    ...record,
+    shift: shiftKey || normalizeShiftKey(record.shift),
+    cashier: getCashierNameFromRecord(record) || '-',
+    startCash: getShiftStartCash(record),
+    endCash: getShiftEndCash(record),
+    openedAt: getShiftOpenedAt(record),
+    closedAt: getShiftClosedAt(record)
+  };
+}
+
+function getShiftByExactDate(shiftName, dateKey) {
+  const shiftKey = normalizeShiftKey(shiftName);
+  if (!shiftKey || !dateKey) return null;
+
+  // KHUSUS SHIFTS: hanya ambil baris yang shift-nya sama.
+  // Tidak boleh fallback ke shift lain.
+  const matches = (shiftHistory || [])
+    .filter(s => normalizeShiftKey(s.shift) === shiftKey)
+    .filter(s => shiftRecordDateMatches(s, dateKey))
+    .sort((a, b) => getShiftSortTime(b) - getShiftSortTime(a));
+
+  if (matches.length) {
+    return normalizeShiftRecord(matches[0], shiftKey);
+  }
+
+  // Fallback hanya ke shiftData untuk shift yang sama, bukan shift lain
+  const liveShift = shiftData?.[shiftKey];
+  if (liveShift && shiftRecordDateMatches(liveShift, dateKey)) {
+    return normalizeShiftRecord(liveShift, shiftKey);
+  }
+
+  return null;
 }
 
 function getShiftByDate(shiftName, startDate, endDate) {
@@ -4011,56 +4184,27 @@ function getShiftByDate(shiftName, startDate, endDate) {
 
   if (!shiftKey || !from || !to) return null;
 
-  const historyMatches = (shiftHistory || [])
+  // Kalau tanggal sama, ambil exact row dari tabel SHIFTS
+  if (from === to) {
+    return getShiftByExactDate(shiftKey, from);
+  }
+
+  // Kalau rentang tanggal, cari hanya dari shift yang sama dalam rentang.
+  // Tetap tidak mengambil data shift lain.
+  const matches = (shiftHistory || [])
     .filter(s => normalizeShiftKey(s.shift) === shiftKey)
-    .filter(s => shiftRecordHasDate(s, from, to))
+    .filter(s => {
+      const tanggal =
+        getDateKey(getFieldValue(s, ['tanggal', 'date'])) ||
+        getDateKey(getShiftOpenedAt(s)) ||
+        getDateKey(getShiftClosedAt(s));
+
+      return tanggal && tanggal >= from && tanggal <= to;
+    })
     .sort((a, b) => getShiftSortTime(b) - getShiftSortTime(a));
 
-  if (historyMatches.length) {
-    const s = historyMatches[0];
-    return {
-      ...s,
-      cashier: getCashierNameFromRecord(s) || '-',
-      startCash: Number(s.startCash || s.start_cash || s.kasAwal || s.kas_awal || 0),
-      endCash: Number(s.endCash || s.end_cash || s.kasAkhir || s.kas_akhir || 0),
-      openedAt: s.openedAt || s.createdAt || s.timestamp || s.tanggal || s.date || '',
-      closedAt: s.closedAt || ''
-    };
-  }
-
-  const liveShift = shiftData?.[shiftKey];
-  if (liveShift && shiftRecordHasDate(liveShift, from, to)) {
-    return {
-      ...liveShift,
-      shift: shiftKey,
-      cashier: getCashierNameFromRecord(liveShift) || '-',
-      startCash: Number(liveShift.startCash || liveShift.start_cash || liveShift.kasAwal || liveShift.kas_awal || 0),
-      endCash: Number(liveShift.endCash || liveShift.end_cash || liveShift.kasAkhir || liveShift.kas_akhir || 0),
-      openedAt: liveShift.openedAt || liveShift.createdAt || liveShift.timestamp || '',
-      closedAt: liveShift.closedAt || ''
-    };
-  }
-
-  const relatedExpenses = (expenses || [])
-    .filter(e => normalizeShiftKey(e.shift) === shiftKey)
-    .filter(e => {
-      const d = getDateKey(e.createdAt || e.timestamp);
-      return d && d >= from && d <= to;
-    })
-    .sort((a, b) => getShiftSortTime(a) - getShiftSortTime(b));
-
-  if (relatedExpenses.length) {
-    const first = relatedExpenses[0];
-    const last = relatedExpenses[relatedExpenses.length - 1];
-
-    return {
-      shift: shiftKey,
-      cashier: getCashierNameFromRecord(first) || getCashierNameFromRecord(last) || '-',
-      startCash: 0,
-      endCash: 0,
-      openedAt: first.createdAt || first.timestamp || '',
-      closedAt: last.createdAt || last.timestamp || ''
-    };
+  if (matches.length) {
+    return normalizeShiftRecord(matches[0], shiftKey);
   }
 
   return null;
