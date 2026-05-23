@@ -1955,12 +1955,12 @@ function renderAdminScreen() {
   // ===============================
   // PISAH PER SHIFT
   // ===============================
-  const shift1Expenses = filteredExpenses.filter(e => e.shift === 'shift1');
-  const shift2Expenses = filteredExpenses.filter(e => e.shift === 'shift2');
+  const shift1Expenses = filteredExpenses.filter(e => normalizeShiftKey(e.shift) === 'shift1');
+  const shift2Expenses = filteredExpenses.filter(e => normalizeShiftKey(e.shift) === 'shift2');
 
   // 🔑 ADMIN: HANYA INPUT HARI INI (BUKAN LAPORAN)
   const adminExpenses = filteredExpenses.filter(e => {
-    if (e.shift !== 'admin') return false;
+    if (normalizeShiftKey(e.shift) !== 'admin') return false;
 
     // ❌ jangan tampil di multi-day
     if (isMultiDay) return false;
@@ -1976,7 +1976,7 @@ function renderAdminScreen() {
   const totalShift1 = shift1Expenses.reduce((s, e) => s + e.amount, 0);
   const totalShift2 = shift2Expenses.reduce((s, e) => s + e.amount, 0);
   const totalAdmin = filteredExpenses
-    .filter(e => e.shift === 'admin')
+    .filter(e => normalizeShiftKey(e.shift) === 'admin')
     .reduce((s, e) => s + e.amount, 0);
 
   const totalPengeluaran = totalShift1 + totalShift2 + totalAdmin;
@@ -2063,7 +2063,7 @@ function renderAdminScreen() {
                            ${isTodayOnly && adminExpenses.length > 0 ? `
   <div class="mt-4 space-y-2">
     ${adminExpenses.map(exp => `
-      <div data-expense-id="${exp.id}" <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
+      <div data-expense-id="${exp.id}" class="bg-white rounded-lg px-3 py-2 border border-gray-200">
   <div class="flex items-start justify-between gap-3">
 
     <!-- KIRI -->
@@ -2230,7 +2230,7 @@ function renderAdminScreen() {
                                     // Group by shift for this date
                                     const shift1Items = dateExpenses.filter(e => e.shift === 'shift1');
                                     const shift2Items = dateExpenses.filter(e => e.shift === 'shift2');
-                                    const adminItems = dateExpenses.filter(e => e.shift === 'admin');
+                                    const adminItems = dateExpenses.filter(e => normalizeShiftKey(e.shift) === 'admin');
                                     
                                     return `
                                         <div>
@@ -2284,7 +2284,7 @@ function renderAdminScreen() {
                                                     ${true ? `
 <div>
 ${(() => {
-  const s1 = getShiftByDate('shift1', startDate, endDate);
+  const s1 = getShiftByDate('shift1', dateKey, dateKey);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-red-300 border border-red-300">
@@ -2364,7 +2364,7 @@ ${(() => {
 ${true ? `
 <div>
 ${(() => {
-  const s2 = getShiftByDate('shift2', startDate, endDate);
+  const s2 = getShiftByDate('shift2', dateKey, dateKey);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-amber-300 border-red-300">
@@ -3887,27 +3887,183 @@ function logoutAdmin() {
 }
 
 
+function normalizeShiftKey(value) {
+  const raw = String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_-]+/g, '');
+
+  if (!raw) return '';
+
+  if (
+    raw === 'shift1' ||
+    raw === 'shif1' ||
+    raw === 'kasirshift1' ||
+    raw === 'kasir1' ||
+    raw === 's1' ||
+    raw.includes('shift1')
+  ) return 'shift1';
+
+  if (
+    raw === 'shift2' ||
+    raw === 'shif2' ||
+    raw === 'kasirshift2' ||
+    raw === 'kasir2' ||
+    raw === 's2' ||
+    raw.includes('shift2')
+  ) return 'shift2';
+
+  if (raw === 'admin' || raw.includes('admin')) return 'admin';
+
+  return raw;
+}
+
+function getDateKey(value) {
+  if (!value) return '';
+
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return value.toISOString().split('T')[0];
+  }
+
+  if (typeof value === 'number') {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
+  }
+
+  if (typeof value === 'string') {
+    const v = value.trim();
+
+    if (/^\d{4}-\d{2}-\d{2}/.test(v)) {
+      const iso = safeISODate(v);
+      return iso ? iso.split('T')[0] : v.slice(0, 10);
+    }
+
+    const dmY = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dmY) {
+      const [, d, m, y] = dmY;
+      return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+
+    const iso = safeISODate(v);
+    return iso ? iso.split('T')[0] : '';
+  }
+
+  return '';
+}
+
+function getCashierNameFromRecord(record) {
+  if (!record) return '';
+  return (
+    record.cashier ||
+    record.cashierName ||
+    record.cashier_name ||
+    record.kasir ||
+    record.namaKasir ||
+    record.nama_kasir ||
+    record.user ||
+    ''
+  );
+}
+
+function shiftRecordHasDate(record, startDate, endDate) {
+  if (!record) return false;
+
+  const dates = [
+    record.openedAt,
+    record.closedAt,
+    record.tanggal,
+    record.date,
+    record.createdAt,
+    record.timestamp
+  ]
+    .map(getDateKey)
+    .filter(Boolean);
+
+  if (dates.some(d => d >= startDate && d <= endDate)) return true;
+
+  const opened = getDateKey(record.openedAt);
+  const closed = getDateKey(record.closedAt);
+  if (opened && closed) {
+    return opened <= endDate && closed >= startDate;
+  }
+
+  return false;
+}
+
+function getShiftSortTime(record) {
+  const raw =
+    record?.closedAt ||
+    record?.openedAt ||
+    record?.createdAt ||
+    record?.timestamp ||
+    record?.tanggal ||
+    record?.date ||
+    0;
+
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? 0 : d.getTime();
+}
+
 function getShiftByDate(shiftName, startDate, endDate) {
-  if (!shiftHistory || !shiftHistory.length) return null;
+  const shiftKey = normalizeShiftKey(shiftName);
+  const from = startDate || safeISODate(new Date())?.split('T')[0];
+  const to = endDate || from;
 
-  return shiftHistory
-    .filter(s => {
-      if (s.shift !== shiftName) return false;
+  if (!shiftKey || !from || !to) return null;
 
-      const dateSource = s.closedAt || s.openedAt || s.tanggal;
-      let date = '';
+  const historyMatches = (shiftHistory || [])
+    .filter(s => normalizeShiftKey(s.shift) === shiftKey)
+    .filter(s => shiftRecordHasDate(s, from, to))
+    .sort((a, b) => getShiftSortTime(b) - getShiftSortTime(a));
 
-      if (typeof dateSource === 'string') {
-        date = dateSource.includes('T')
-          ? dateSource.split('T')[0]
-          : dateSource.slice(0, 10);
-      }
+  if (historyMatches.length) {
+    const s = historyMatches[0];
+    return {
+      ...s,
+      cashier: getCashierNameFromRecord(s) || '-',
+      startCash: Number(s.startCash || s.start_cash || s.kasAwal || s.kas_awal || 0),
+      endCash: Number(s.endCash || s.end_cash || s.kasAkhir || s.kas_akhir || 0),
+      openedAt: s.openedAt || s.createdAt || s.timestamp || s.tanggal || s.date || '',
+      closedAt: s.closedAt || ''
+    };
+  }
 
-      if (!date) return false;
+  const liveShift = shiftData?.[shiftKey];
+  if (liveShift && shiftRecordHasDate(liveShift, from, to)) {
+    return {
+      ...liveShift,
+      shift: shiftKey,
+      cashier: getCashierNameFromRecord(liveShift) || '-',
+      startCash: Number(liveShift.startCash || liveShift.start_cash || liveShift.kasAwal || liveShift.kas_awal || 0),
+      endCash: Number(liveShift.endCash || liveShift.end_cash || liveShift.kasAkhir || liveShift.kas_akhir || 0),
+      openedAt: liveShift.openedAt || liveShift.createdAt || liveShift.timestamp || '',
+      closedAt: liveShift.closedAt || ''
+    };
+  }
 
-      return date >= startDate && date <= endDate;
+  const relatedExpenses = (expenses || [])
+    .filter(e => normalizeShiftKey(e.shift) === shiftKey)
+    .filter(e => {
+      const d = getDateKey(e.createdAt || e.timestamp);
+      return d && d >= from && d <= to;
     })
-    .sort((a, b) => new Date(b.closedAt || b.openedAt || 0) - new Date(a.closedAt || a.openedAt || 0))[0] || null;
+    .sort((a, b) => getShiftSortTime(a) - getShiftSortTime(b));
+
+  if (relatedExpenses.length) {
+    const first = relatedExpenses[0];
+    const last = relatedExpenses[relatedExpenses.length - 1];
+
+    return {
+      shift: shiftKey,
+      cashier: getCashierNameFromRecord(first) || getCashierNameFromRecord(last) || '-',
+      startCash: 0,
+      endCash: 0,
+      openedAt: first.createdAt || first.timestamp || '',
+      closedAt: last.createdAt || last.timestamp || ''
+    };
+  }
+
+  return null;
 }
 
 
@@ -4022,7 +4178,7 @@ function createChart() {
       borderWidth: 0,
       borderRadius: 8,
       borderSkipped: false,
-      bbackgroundColor:
+      backgroundColor:
   cat === 'Belanja Bahan Baku'
     ? 'rgba(220, 38, 38, 0.85)'
     : cat === 'Operasional'
