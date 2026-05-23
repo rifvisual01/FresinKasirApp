@@ -2767,7 +2767,7 @@ categoryExpenses.forEach(exp => {
                             
                             <div class="mb-6">
 ${(() => {
-  const s1 = getShiftByDate('shift1', dateKey, dateKey);
+  const s1 = getShiftByDate('shift1', startDate, endDate);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-red-300 border border-red-300">
@@ -2846,7 +2846,7 @@ ${shift1Expenses.length === 0 ? `
 
 <div class="mb-6">
 ${(() => {
-  const s2 = getShiftByDate('shift2', dateKey, dateKey);
+  const s2 = getShiftByDate('shift2', startDate, endDate);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-amber-300 border border-red-300">
