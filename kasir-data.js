@@ -30,7 +30,7 @@ window.LOCAL_CASHIERS = [
   
   {
     name: 'Admin',
-    pin: '1234',
+    pin: '777',
     role: 'admin',
     active: true
   }
