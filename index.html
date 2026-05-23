@@ -1519,13 +1519,102 @@ function renderAdminDeleteButton(exp) {
   `;
 }
 
+
 function deleteExpenseFromAdmin(id) {
   if (!id) return;
+  showAdminDeleteConfirm(id);
+}
 
-  const ok = confirm('Hapus pengeluaran ini dari laporan?');
-  if (!ok) return;
+function showAdminDeleteConfirm(id) {
+  if (!id) return;
 
-  deleteExpense(id);
+  // Hindari modal dobel
+  document.getElementById('adminDeleteConfirm')?.remove();
+
+  const exp = expenses.find(e => e.id === id) || {};
+  const name = exp.expense_name || 'Pengeluaran ini';
+  const amount = Number(exp.amount || 0).toLocaleString('id-ID');
+  const category = exp.category || '-';
+
+  const modal = document.createElement('div');
+  modal.id = 'adminDeleteConfirm';
+  modal.className = 'fixed inset-0 bg-slate-950/45 backdrop-blur-sm flex items-center justify-center z-50 p-4';
+  modal.onclick = closeAdminDeleteConfirm;
+
+  modal.innerHTML = `
+    <div
+      class="w-full max-w-sm glass-effect card-modern rounded-3xl overflow-hidden animate-slide-in border border-white/40"
+      onclick="event.stopPropagation()"
+    >
+      <div class="gradient-primary p-5 text-white relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-28 h-28 bg-white/10 rounded-full"></div>
+        <div class="absolute -left-8 -bottom-10 w-24 h-24 bg-white/10 rounded-full"></div>
+
+        <div class="relative flex items-center gap-3">
+          <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
+            🗑️
+          </div>
+          <div>
+            <h3 class="text-xl font-black leading-tight">Hapus Pengeluaran?</h3>
+            <p class="text-xs font-semibold text-white/80 mt-1">Data akan dihapus dari laporan admin</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-5 bg-white">
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 mb-5">
+          <p class="text-xs font-black text-slate-400 uppercase tracking-wide mb-1">Detail pengeluaran</p>
+          <p class="text-base font-black text-slate-800 leading-snug break-words">${name}</p>
+          <div class="flex items-center justify-between gap-3 mt-3 text-sm">
+            <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-bold">${category}</span>
+            <span class="font-black text-blue-700 whitespace-nowrap">Rp ${amount}</span>
+          </div>
+        </div>
+
+        <p class="text-sm text-slate-500 font-semibold mb-5 leading-relaxed">
+          Setelah dikonfirmasi, item ini akan masuk antrean sinkronisasi dan ikut terhapus di database saat koneksi aktif.
+        </p>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onclick="closeAdminDeleteConfirm()"
+            class="py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-black transition-all"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            id="adminDeleteConfirmBtn"
+            onclick="confirmAdminDeleteExpense('${id}')"
+            class="py-3 rounded-xl gradient-primary text-white font-black shadow-lg hover:shadow-xl transition-all"
+          >
+            Ya, Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function closeAdminDeleteConfirm() {
+  document.getElementById('adminDeleteConfirm')?.remove();
+}
+
+async function confirmAdminDeleteExpense(id) {
+  if (!id) return;
+
+  const btn = document.getElementById('adminDeleteConfirmBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = 'Menghapus...';
+    btn.classList.add('opacity-80', 'cursor-not-allowed');
+  }
+
+  closeAdminDeleteConfirm();
+  await deleteExpense(id);
 }
 
 function renderAdminScreen() {
