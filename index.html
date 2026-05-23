@@ -1354,7 +1354,7 @@ const shiftExpenses = expenses.filter(e =>
                                                 </div>
                                                 <div class="flex items-center gap-3">
                                                     <p class="text-xl font-black text-red-600">Rp ${exp.amount.toLocaleString('id-ID')}</p>
-                                                    <button onclick="deleteExpense('${exp.id}')" class="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg">
+                                                    <button onclick="event.stopPropagation(); deleteExpenseFromAdmin('${exp.id}')" class="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg">
                                                         <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                                                         </svg>
@@ -1501,6 +1501,31 @@ const lastShift1 = shiftHistory
   } catch (err) {
     console.error('❌ Gagal load expenses admin', err);
   }
+}
+
+
+function renderAdminDeleteButton(exp) {
+  if (!exp || !exp.id) return '';
+
+  return `
+    <button
+      type="button"
+      onclick="event.stopPropagation(); deleteExpenseFromAdmin('${exp.id}')"
+      class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-black shrink-0 transition-all"
+      title="Hapus pengeluaran"
+    >
+      ✕
+    </button>
+  `;
+}
+
+function deleteExpenseFromAdmin(id) {
+  if (!id) return;
+
+  const ok = confirm('Hapus pengeluaran ini dari laporan?');
+  if (!ok) return;
+
+  deleteExpense(id);
 }
 
 function renderAdminScreen() {
@@ -1671,7 +1696,7 @@ function renderAdminScreen() {
         Rp ${exp.amount.toLocaleString('id-ID')}
       </span>
       <button
-        onclick="deleteExpense('${exp.id}')"
+        onclick="event.stopPropagation(); deleteExpenseFromAdmin('${exp.id}')"
         class="w-7 h-7 flex items-center justify-center rounded-md bg-red-50 text-red-600"
       >
         ✕
@@ -1928,9 +1953,12 @@ ${(() => {
     </div>
 
     <!-- KANAN -->
+    <div class="flex items-center gap-2 shrink-0">
     <p class="text-sm font-bold text-purple-600 whitespace-nowrap shrink-0">
       Rp ${exp.amount.toLocaleString('id-ID')}
     </p>
+    ${renderAdminDeleteButton(exp)}
+  </div>
 
   </div>
 </div>
@@ -2007,9 +2035,12 @@ ${(() => {
     </div>
 
     <!-- KANAN -->
+    <div class="flex items-center gap-2 shrink-0">
     <p class="text-sm font-bold text-pink-600 whitespace-nowrap shrink-0">
       Rp ${exp.amount.toLocaleString('id-ID')}
     </p>
+    ${renderAdminDeleteButton(exp)}
+  </div>
 
   </div>
 </div>
@@ -2061,9 +2092,12 @@ ${(() => {
             </div>
 
             <!-- KANAN -->
-            <p class="text-sm font-bold text-purple-600 whitespace-nowrap shrink-0">
+            <div class="flex items-center gap-2 shrink-0">
+    <p class="text-sm font-bold text-purple-600 whitespace-nowrap shrink-0">
               Rp ${exp.amount.toLocaleString('id-ID')}
             </p>
+    ${renderAdminDeleteButton(exp)}
+  </div>
 
           </div>
         </div>
@@ -2197,6 +2231,7 @@ categoryExpenses.forEach(exp => {
     </div>
 
     <!-- KANAN -->
+    <div class="flex items-center gap-2 shrink-0">
     <p class="text-sm font-bold whitespace-nowrap
       ${exp.shift === 'shift1'
         ? 'text-purple-600'
@@ -2205,6 +2240,8 @@ categoryExpenses.forEach(exp => {
         : 'text-blue-600'}">
       Rp ${exp.amount.toLocaleString('id-ID')}
     </p>
+    ${renderAdminDeleteButton(exp)}
+  </div>
 
   </div>
 </div>
@@ -2267,6 +2304,7 @@ categoryExpenses.forEach(exp => {
     </div>
 
     <!-- KANAN -->
+    <div class="flex items-center gap-2 shrink-0">
     <p class="text-sm font-bold whitespace-nowrap
       ${exp.shift === 'shift1'
         ? 'text-purple-600'
@@ -2275,6 +2313,8 @@ categoryExpenses.forEach(exp => {
         : 'text-blue-600'}">
       Rp ${exp.amount.toLocaleString('id-ID')}
     </p>
+    ${renderAdminDeleteButton(exp)}
+  </div>
 
   </div>
 </div>
@@ -2354,9 +2394,12 @@ ${shift1Expenses.length === 0 ? `
     </div>
 
     <!-- KANAN -->
+    <div class="flex items-center gap-2 shrink-0">
     <p class="text-sm font-bold text-purple-600 whitespace-nowrap shrink-0">
       Rp ${exp.amount.toLocaleString('id-ID')}
     </p>
+    ${renderAdminDeleteButton(exp)}
+  </div>
 
   </div>
 </div>
@@ -2430,9 +2473,12 @@ ${shift2Expenses.length === 0 ? `
     </div>
 
     <!-- KANAN -->
+    <div class="flex items-center gap-2 shrink-0">
     <p class="text-sm font-bold text-pink-600 whitespace-nowrap shrink-0">
       Rp ${exp.amount.toLocaleString('id-ID')}
     </p>
+    ${renderAdminDeleteButton(exp)}
+  </div>
 
   </div>
 </div>
@@ -2487,9 +2533,12 @@ ${shift2Expenses.length === 0 ? `
     </div>
 
     <!-- KANAN -->
+    <div class="flex items-center gap-2 shrink-0">
     <p class="text-sm font-bold text-blue-600 whitespace-nowrap shrink-0">
       Rp ${exp.amount.toLocaleString('id-ID')}
     </p>
+    ${renderAdminDeleteButton(exp)}
+  </div>
 
   </div>
 </div>
@@ -3017,7 +3066,27 @@ if (navigator.onLine) {
 
   // 1️⃣ UI-FIRST: langsung hilangkan dari UI
   expenses = expenses.filter(e => e.id !== id);
-  renderCurrentView();
+
+  // Kalau sedang di admin, render ulang laporan + grafik tanpa fetch ulang
+  if (currentView === 'admin') {
+    normalizeExpenses();
+    const app = document.getElementById('app');
+    app.innerHTML = renderAdminScreen();
+
+    requestAnimationFrame(() => {
+      initExpenseSuggestion?.();
+
+      const todayISO = safeISODate(new Date())?.split('T')[0];
+      const startDate = selectedPeriodStart || todayISO;
+      const endDate = selectedPeriodEnd || todayISO;
+
+      if (startDate && endDate && startDate !== endDate) {
+        createChart?.();
+      }
+    });
+  } else {
+    renderCurrentView();
+  }
 
   // 2️⃣ SELALU simpan ke queue (online / offline sama)
   await saveToQueue({
