@@ -2284,7 +2284,7 @@ function renderAdminScreen() {
                                                     ${true ? `
 <div>
 ${(() => {
-  const s1 = getShiftByDate('shift1', dateKey, dateKey);
+  const s1 = getShiftByDate('shift1', dateKey, dateKey, shift1Items);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-red-300 border border-red-300">
@@ -2308,8 +2308,8 @@ ${(() => {
 
        <!-- BARIS 2 : INFO KAS -->
       <div class="flex items-center justify-between text-sm font-semibold text-gray-700">
-        <span>📥 Rp ${(s1?.startCash || 0).toLocaleString('id-ID')}</span>
-        <span>📤 Rp ${(s1?.endCash || 0).toLocaleString('id-ID')}</span>
+        <span>📥 Rp ${formatNumberSafe(s1?.startCash)}</span>
+        <span>📤 Rp ${formatNumberSafe(s1?.endCash)}</span>
       </div>
 
     </div>
@@ -2364,7 +2364,7 @@ ${(() => {
 ${true ? `
 <div>
 ${(() => {
-  const s2 = getShiftByDate('shift2', dateKey, dateKey);
+  const s2 = getShiftByDate('shift2', dateKey, dateKey, shift2Items);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-amber-300 border-red-300">
@@ -2388,8 +2388,8 @@ ${(() => {
 
       <!-- BARIS 2 : INFO KAS -->
       <div class="flex items-center justify-between text-sm font-semibold text-gray-700">
-        <span>📥 Rp ${(s2?.startCash || 0).toLocaleString('id-ID')}</span>
-        <span>📤 Rp ${(s2?.endCash || 0).toLocaleString('id-ID')}</span>
+        <span>📥 Rp ${formatNumberSafe(s2?.startCash)}</span>
+        <span>📤 Rp ${formatNumberSafe(s2?.endCash)}</span>
       </div>
 
     </div>
@@ -2727,7 +2727,7 @@ categoryExpenses.forEach(exp => {
                             
                             <div class="mb-6">
 ${(() => {
-  const s1 = getShiftByDate('shift1', startDate, endDate);
+  const s1 = getShiftByDate('shift1', startDate, endDate, shift1Expenses);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-red-300 border border-red-300">
@@ -2751,8 +2751,8 @@ ${(() => {
 
       <!-- BARIS 2 : INFO KAS -->
       <div class="flex items-center justify-between text-sm font-semibold text-red-900">
-        <span>📥 Rp ${(s1?.startCash || 0).toLocaleString('id-ID')}</span>
-        <span>📤 Rp ${(s1?.endCash || 0).toLocaleString('id-ID')}</span>
+        <span>📥 Rp ${formatNumberSafe(s1?.startCash)}</span>
+        <span>📤 Rp ${formatNumberSafe(s1?.endCash)}</span>
       </div>
 
     </div>
@@ -2806,7 +2806,7 @@ ${shift1Expenses.length === 0 ? `
 
 <div class="mb-6">
 ${(() => {
-  const s2 = getShiftByDate('shift2', startDate, endDate);
+  const s2 = getShiftByDate('shift2', startDate, endDate, shift2Expenses);
 
   return `
     <div class="rounded-xl p-4 mb-4 bg-amber-300 border border-red-300">
@@ -2830,8 +2830,8 @@ ${(() => {
 
       <!-- BARIS 2 : INFO KAS -->
       <div class="flex items-center justify-between text-sm font-semibold text-amber-900">
-        <span>📥 Rp ${(s2?.startCash || 0).toLocaleString('id-ID')}</span>
-        <span>📤 Rp ${(s2?.endCash || 0).toLocaleString('id-ID')}</span>
+        <span>📥 Rp ${formatNumberSafe(s2?.startCash)}</span>
+        <span>📤 Rp ${formatNumberSafe(s2?.endCash)}</span>
       </div>
 
     </div>
@@ -3131,8 +3131,7 @@ async function loginShift() {
   const startCash = parseRupiah(document.getElementById('startCash').value);
   const shift = currentShift;
 
-  // Fresin: Shift 1 boleh mulai dari kas awal 0.
-  // Shift 2 tetap wajib memiliki kas awal lebih dari 0.
+  // Fresin: Shift 1 boleh kas awal 0, Shift 2 tetap harus lebih dari 0
   const invalidStartCash = shift === 'shift1'
     ? startCash < 0
     : startCash <= 0;
@@ -3893,29 +3892,158 @@ function logoutAdmin() {
 }
 
 
-function getShiftByDate(shiftName, startDate, endDate) {
-  if (!shiftHistory || !shiftHistory.length) return null;
 
-  return shiftHistory
-    .filter(s => {
-      if (s.shift !== shiftName) return false;
+function normalizeDateKey(value) {
+  if (!value && value !== 0) return '';
 
-      const dateSource = s.closedAt || s.openedAt || s.tanggal;
-      let date = '';
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, '0');
+    const d = String(value.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
 
-      if (typeof dateSource === 'string') {
-        date = dateSource.includes('T')
-          ? dateSource.split('T')[0]
-          : dateSource.slice(0, 10);
-      }
+  if (typeof value === 'number') {
+    const d = new Date(value);
+    if (!isNaN(d.getTime())) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+  }
 
-      if (!date) return false;
+  const raw = String(value).trim();
+  if (!raw) return '';
 
-      return date >= startDate && date <= endDate;
-    })
-    .sort((a, b) => new Date(b.closedAt || b.openedAt || 0) - new Date(a.closedAt || a.openedAt || 0))[0] || null;
+  // 2026-05-23 atau 2026-05-23T10:20:00
+  const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (iso) {
+    return `${iso[1]}-${String(iso[2]).padStart(2, '0')}-${String(iso[3]).padStart(2, '0')}`;
+  }
+
+  // 23/5/2026, 23/05/2026 18:03:00, 23-05-2026
+  const dmy = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+  if (dmy) {
+    return `${dmy[3]}-${String(dmy[2]).padStart(2, '0')}-${String(dmy[1]).padStart(2, '0')}`;
+  }
+
+  const parsed = new Date(raw);
+  if (!isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth() + 1).padStart(2, '0');
+    const d = String(parsed.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  return '';
 }
 
+function normalizeShiftName(value) {
+  const raw = String(value || '').toLowerCase().replace(/\s+/g, '');
+  if (raw.includes('shift1') || raw.includes('kasirshift1')) return 'shift1';
+  if (raw.includes('shift2') || raw.includes('kasirshift2')) return 'shift2';
+  return raw;
+}
+
+function getField(obj, names) {
+  if (!obj) return undefined;
+  for (const name of names) {
+    if (obj[name] !== undefined && obj[name] !== null && obj[name] !== '') return obj[name];
+  }
+  return undefined;
+}
+
+function normalizeShiftRecord(s) {
+  if (!s) return null;
+  return {
+    ...s,
+    shift: normalizeShiftName(getField(s, ['shift', 'Shift', 'namaShift', 'shiftName'])),
+    cashier: getField(s, ['cashier', 'Cashier', 'kasir', 'Kasir', 'namaKasir']) || '-',
+    startCash: Number(String(getField(s, ['startCash', 'StartCash', 'kasAwal', 'KasAwal', 'kas_awal']) ?? 0).replace(/[^0-9-]/g, '')) || 0,
+    endCash: Number(String(getField(s, ['endCash', 'EndCash', 'kasAkhir', 'KasAkhir', 'kas_akhir']) ?? 0).replace(/[^0-9-]/g, '')) || 0,
+    openedAt: getField(s, ['openedAt', 'OpenedAt', 'jamMasuk', 'JamMasuk', 'openAt']) || null,
+    closedAt: getField(s, ['closedAt', 'ClosedAt', 'jamKeluar', 'JamKeluar', 'closeAt']) || null,
+    tanggal: getField(s, ['tanggal', 'Tanggal', 'date', 'Date']) || null,
+    sessionId: getField(s, ['sessionId', 'SessionId', 'sessionID', 'idSesi']) || null,
+    status: String(getField(s, ['status', 'Status']) || '').toLowerCase()
+  };
+}
+
+function getShiftDateKey(s) {
+  // Prioritas tanggal dari kolom tanggal, karena di sheet Fresin kas awal shift 1 bisa 0.
+  return normalizeDateKey(s?.tanggal) ||
+         normalizeDateKey(s?.closedAt) ||
+         normalizeDateKey(s?.openedAt);
+}
+
+function getShiftSortTime(s) {
+  const raw = s?.closedAt || s?.openedAt || s?.tanggal || '';
+  const parsed = new Date(raw);
+  if (!isNaN(parsed.getTime())) return parsed.getTime();
+
+  const key = getShiftDateKey(s);
+  const fallback = new Date(key);
+  return isNaN(fallback.getTime()) ? 0 : fallback.getTime();
+}
+
+function formatNumberSafe(value) {
+  const n = Number(String(value ?? 0).replace(/[^0-9-]/g, '')) || 0;
+  return n.toLocaleString('id-ID');
+}
+
+function formatTimeSafe(value) {
+  if (!value) return '-';
+  const raw = String(value).trim();
+
+  const time = raw.match(/(\d{1,2})[:.](\d{2})(?::\d{2})?/);
+  if (time) {
+    return `${String(time[1]).padStart(2, '0')}.${time[2]}`;
+  }
+
+  const d = new Date(raw);
+  if (!isNaN(d.getTime())) {
+    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  return '-';
+}
+
+function getShiftByDate(shiftName, startDate, endDate, shiftItems = []) {
+  if (!shiftHistory || !shiftHistory.length) return null;
+
+  const targetShift = normalizeShiftName(shiftName);
+  const startKey = normalizeDateKey(startDate);
+  const endKey = normalizeDateKey(endDate);
+
+  const normalizedHistory = shiftHistory
+    .map(normalizeShiftRecord)
+    .filter(Boolean)
+    .filter(s => s.shift === targetShift);
+
+  // Fallback paling kuat: samakan sessionId dari item pengeluaran pada hari itu.
+  // Ini penting untuk Fresin Shift 1 karena kas awal bisa 0, sehingga tanggal/jam dari sheet kadang beda format.
+  const sessionIds = [...new Set((shiftItems || [])
+    .map(e => e?.sessionId)
+    .filter(Boolean)
+  )];
+
+  if (sessionIds.length) {
+    const bySession = normalizedHistory
+      .filter(s => s.sessionId && sessionIds.includes(s.sessionId))
+      .sort((a, b) => getShiftSortTime(b) - getShiftSortTime(a))[0];
+
+    if (bySession) return bySession;
+  }
+
+  return normalizedHistory
+    .filter(s => {
+      const date = getShiftDateKey(s);
+      if (!date || !startKey || !endKey) return false;
+      return date >= startKey && date <= endKey;
+    })
+    .sort((a, b) => getShiftSortTime(b) - getShiftSortTime(a))[0] || null;
+}
 
 function toggleChartData(type) {
   chartVisibleData[type] = !chartVisibleData[type];
