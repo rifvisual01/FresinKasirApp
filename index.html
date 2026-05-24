@@ -3888,81 +3888,60 @@ function logoutAdmin() {
 
 
 function normalizeShiftDate(value) {
-  if (value === null || value === undefined || value === '') return '';
+  if (!value) return '';
 
-  // Google Sheets kadang mengirim Date object / serial number / string
   if (value instanceof Date && !isNaN(value.getTime())) {
     return value.toISOString().split('T')[0];
   }
 
-  // Excel / Google Sheets serial date fallback
-  if (typeof value === 'number' && isFinite(value)) {
-    const d = new Date(Math.round((value - 25569) * 86400 * 1000));
-    if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+  if (typeof value === 'number') {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
   }
 
-  const raw = String(value).trim();
-  if (!raw) return '';
+  if (typeof value !== 'string') return '';
 
-  // Format utama dari sheet: 2026-05-23
-  let m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (m) {
-    return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
+  const v = value.trim();
+
+  // Format sudah benar: 2026-05-23 atau 2026-05-23 18:51:04
+  const isoMatch = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoMatch) {
+    const y = isoMatch[1];
+    const m = isoMatch[2].padStart(2, '0');
+    const d = isoMatch[3].padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 
-  // Format Google Sheet Indonesia: 23/5/2026 atau 23/05/2026 18:51:04
-  m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (m) {
-    return `${m[3]}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
+  // Format dari Google Sheet: 23/5/2026 atau 23/5/2026 18:51:04
+  const idMatch = v.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if (idMatch) {
+    const d = idMatch[1].padStart(2, '0');
+    const m = idMatch[2].padStart(2, '0');
+    const y = idMatch[3];
+    return `${y}-${m}-${d}`;
   }
 
-  // Format alternatif: 23-5-2026 atau 23-05-2026
-  m = raw.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);
-  if (m) {
-    return `${m[3]}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
-  }
-
-  const d = new Date(raw);
-  if (!isNaN(d.getTime())) {
-    return d.toISOString().split('T')[0];
-  }
-
-  return '';
-}
-
-function normalizeShiftName(value) {
-  return String(value || '').toLowerCase().replace(/\s+/g, '');
+  const parsed = new Date(v);
+  return isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0];
 }
 
 function getShiftByDate(shiftName, startDate, endDate) {
   if (!shiftHistory || !shiftHistory.length) return null;
 
-  const targetShift = normalizeShiftName(shiftName);
-  const startKey = normalizeShiftDate(startDate) || startDate;
-  const endKey = normalizeShiftDate(endDate) || endDate;
-
   return shiftHistory
     .filter(s => {
-      if (normalizeShiftName(s.shift) !== targetShift) return false;
+      if (s.shift !== shiftName) return false;
 
-      // Prioritaskan kolom tanggal sheet.
-      // Ini penting untuk Fresin karena Shift 1 boleh kas awal 0,
-      // sehingga identitas shift tetap harus dibaca dari tanggal,
-      // bukan dari nominal kas atau format jam buka/tutup.
-      const date =
-        normalizeShiftDate(s.tanggal) ||
-        normalizeShiftDate(s.date) ||
-        normalizeShiftDate(s.closedAt) ||
-        normalizeShiftDate(s.openedAt);
-
+      // Prioritas utama tetap kolom tanggal, karena formatnya paling stabil untuk laporan.
+      const date = normalizeShiftDate(s.tanggal || s.closedAt || s.openedAt);
       if (!date) return false;
 
-      return date >= startKey && date <= endKey;
+      return date >= startDate && date <= endDate;
     })
     .sort((a, b) => {
-      const tb = new Date(b.closedAt || b.openedAt || b.tanggal || 0).getTime() || 0;
-      const ta = new Date(a.closedAt || a.openedAt || a.tanggal || 0).getTime() || 0;
-      return tb - ta;
+      const timeA = new Date(a.closedAt || a.openedAt || a.tanggal || 0).getTime() || 0;
+      const timeB = new Date(b.closedAt || b.openedAt || b.tanggal || 0).getTime() || 0;
+      return timeB - timeA;
     })[0] || null;
 }
 
