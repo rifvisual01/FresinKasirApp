@@ -3887,24 +3887,34 @@ function logoutAdmin() {
 }
 
 
-function normalizeShiftDate(value) {
-  if (!value) return '';
+function normalizeShiftKey(value) {
+  const raw = String(value || '').toLowerCase().replace(/[\s_\-]/g, '');
 
-  if (value instanceof Date && !isNaN(value.getTime())) {
-    return value.toISOString().split('T')[0];
+  if (raw === 'shift1' || raw === 'kasirshift1' || raw === '1' || raw.includes('shift1')) {
+    return 'shift1';
   }
 
+  if (raw === 'shift2' || raw === 'kasirshift2' || raw === '2' || raw.includes('shift2')) {
+    return 'shift2';
+  }
+
+  return raw;
+}
+
+function normalizeShiftDate(value) {
+  if (value === null || value === undefined || value === '') return '';
+
+  // Excel/Google Sheet serial date fallback
   if (typeof value === 'number') {
-    const d = new Date(value);
+    const d = new Date(Math.round((value - 25569) * 86400 * 1000));
     return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
   }
 
-  if (typeof value !== 'string') return '';
+  const raw = String(value).trim();
+  if (!raw) return '';
 
-  const v = value.trim();
-
-  // Format sudah benar: 2026-05-23 atau 2026-05-23 18:51:04
-  const isoMatch = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  // Sudah ISO / yyyy-mm-dd / yyyy-mm-dd HH:mm:ss
+  const isoMatch = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (isoMatch) {
     const y = isoMatch[1];
     const m = isoMatch[2].padStart(2, '0');
@@ -3912,8 +3922,8 @@ function normalizeShiftDate(value) {
     return `${y}-${m}-${d}`;
   }
 
-  // Format dari Google Sheet: 23/5/2026 atau 23/5/2026 18:51:04
-  const idMatch = v.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  // Format sheet Indonesia: dd/mm/yyyy, dd-mm-yyyy, plus jam di belakang
+  const idMatch = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
   if (idMatch) {
     const d = idMatch[1].padStart(2, '0');
     const m = idMatch[2].padStart(2, '0');
@@ -3921,22 +3931,42 @@ function normalizeShiftDate(value) {
     return `${y}-${m}-${d}`;
   }
 
-  const parsed = new Date(v);
-  return isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0];
+  const parsed = new Date(raw);
+  if (!isNaN(parsed.getTime())) {
+    return parsed.toISOString().split('T')[0];
+  }
+
+  return '';
 }
 
 function getShiftByDate(shiftName, startDate, endDate) {
   if (!shiftHistory || !shiftHistory.length) return null;
 
+  const targetShift = normalizeShiftKey(shiftName);
+  const startKey = normalizeShiftDate(startDate) || startDate;
+  const endKey = normalizeShiftDate(endDate) || endDate;
+
   return shiftHistory
     .filter(s => {
-      if (s.shift !== shiftName) return false;
+      const currentShift = normalizeShiftKey(
+        s.shift || s.shiftName || s.shift_name || s.namaShift || s.nama_shift || s.shiftLabel || s.shift_label
+      );
 
-      // Prioritas utama tetap kolom tanggal, karena formatnya paling stabil untuk laporan.
-      const date = normalizeShiftDate(s.tanggal || s.closedAt || s.openedAt);
+      if (currentShift !== targetShift) return false;
+
+      // Prioritaskan kolom tanggal karena paling stabil untuk laporan harian.
+      // openedAt/closedAt hanya fallback, bukan syarat utama.
+      const date =
+        normalizeShiftDate(s.tanggal) ||
+        normalizeShiftDate(s.date) ||
+        normalizeShiftDate(s.tanggalShift) ||
+        normalizeShiftDate(s.tanggal_shift) ||
+        normalizeShiftDate(s.openedAt) ||
+        normalizeShiftDate(s.closedAt);
+
       if (!date) return false;
 
-      return date >= startDate && date <= endDate;
+      return date >= startKey && date <= endKey;
     })
     .sort((a, b) => {
       const timeA = new Date(a.closedAt || a.openedAt || a.tanggal || 0).getTime() || 0;
