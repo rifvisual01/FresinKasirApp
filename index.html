@@ -369,7 +369,7 @@ html, body {
         };
    
        ///Variabel Global///
-        const CATEGORIES = ["Bahan Baku", "Operasional", "Staff"];
+        const CATEGORIES = ["Bahan Baku", "Operasional", "Staff", "Dapur Enyak", "Dapur Mamak", "Donat"];
 
         let currentView = 'home';
    let cashiers = [];
@@ -386,7 +386,7 @@ html, body {
         let selectedPeriodEnd = null;
         let searchQuery = '';
         let chartInstance = null;
-        let chartVisibleData = { 'Bahan Baku': true, 'Operasional': true, 'Staff': true };
+        let chartVisibleData = Object.fromEntries(CATEGORIES.map(cat => [cat, true]));
    let isProcessingQueue = false;
    let adminDataReady = false;
 let isSyncing = false;        
@@ -1976,6 +1976,7 @@ function renderAdminScreen() {
     const expDate = safeISODate(e.createdAt || e.timestamp)?.split('T')[0];
     return expDate === today;
   });
+  const adminReportExpenses = filteredExpenses.filter(e => e.shift === 'admin');
 
   // ===============================
   // TOTAL
@@ -2160,8 +2161,6 @@ function renderAdminScreen() {
 </div>
 
 
-                        
-                        ${!isMultiDay ? `
 <div class="px-4 md:px-6 mb-8">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
 
@@ -2205,7 +2204,7 @@ function renderAdminScreen() {
 </div>
 
 
-` : `
+${isMultiDay ? `
 
                         <div class="glass-effect card-modern rounded-3xl p-8 mb-6">
                             <h3 class="text-2xl font-black text-gray-800 mb-6">📊 Grafik Pengeluaran</h3>
@@ -2219,12 +2218,21 @@ function renderAdminScreen() {
                                 <button onclick="toggleChartData('Staff')" id="chart-toggle-Staff" class="px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white">
                                     👥 Staff
                                 </button>
+                                <button onclick="toggleChartData('Dapur Enyak')" id="chart-toggle-Dapur Enyak" class="px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
+                                    🍳 Dapur Enyak
+                                </button>
+                                <button onclick="toggleChartData('Dapur Mamak')" id="chart-toggle-Dapur Mamak" class="px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-fuchsia-600 to-fuchsia-700 text-white">
+                                    🍲 Dapur Mamak
+                                </button>
+                                <button onclick="toggleChartData('Donat')" id="chart-toggle-Donat" class="px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-pink-600 to-pink-700 text-white">
+                                    🍩 Donat
+                                </button>
                             </div>
                             <div class="relative bg-white rounded-2xl p-6 shadow-inner" style="height: 450px;">
                                 <canvas id="expenseChart"></canvas>
                             </div>
                         </div>
-                        `}
+                        ` : ''}
                         
                         ${isMultiDay ? `
                         <div class="glass-effect card-modern rounded-3xl p-8 mb-6">
@@ -2903,13 +2911,13 @@ ${shift2Expenses.length === 0 ? `
     </div>
   </div>
 
-  ${adminExpenses.length === 0 ? `
+  ${adminReportExpenses.length === 0 ? `
     <p class="text-center text-gray-400 py-6 text-sm font-semibold">
       Tidak ada pengeluaran
     </p>
   ` : `
     <div class="space-y-2">
-      ${adminExpenses.map(exp => `
+      ${adminReportExpenses.map(exp => `
         <div class="bg-white rounded-lg px-3 py-2 border border-gray-200">
           <div class="flex items-start justify-between gap-3">
                             
@@ -4052,17 +4060,46 @@ function getShiftByDate(shiftName, startDate, endDate, shiftItems = []) {
     .sort((a, b) => getShiftSortTime(b) - getShiftSortTime(a))[0] || null;
 }
 
+function getChartCategoryMeta(type) {
+  const meta = {
+    'Bahan Baku': {
+      buttonClass: 'bg-gradient-to-r from-red-600 to-red-700',
+      bg: 'rgba(220, 38, 38, 0.85)'
+    },
+    'Operasional': {
+      buttonClass: 'bg-gradient-to-r from-amber-600 to-amber-700',
+      bg: 'rgba(245, 158, 11, 0.85)'
+    },
+    'Staff': {
+      buttonClass: 'bg-gradient-to-r from-blue-600 to-blue-700',
+      bg: 'rgba(59, 130, 246, 0.85)'
+    },
+    'Dapur Enyak': {
+      buttonClass: 'bg-gradient-to-r from-emerald-600 to-emerald-700',
+      bg: 'rgba(5, 150, 105, 0.85)'
+    },
+    'Dapur Mamak': {
+      buttonClass: 'bg-gradient-to-r from-fuchsia-600 to-fuchsia-700',
+      bg: 'rgba(192, 38, 211, 0.85)'
+    },
+    'Donat': {
+      buttonClass: 'bg-gradient-to-r from-pink-600 to-pink-700',
+      bg: 'rgba(219, 39, 119, 0.85)'
+    }
+  };
+
+  return meta[type] || {
+    buttonClass: 'bg-gradient-to-r from-slate-600 to-slate-700',
+    bg: 'rgba(71, 85, 105, 0.85)'
+  };
+}
+
 function toggleChartData(type) {
   chartVisibleData[type] = !chartVisibleData[type];
 
   const button = document.getElementById(`chart-toggle-${type}`);
   if (chartVisibleData[type]) {
-    if (type === 'Belanja Bahan Baku')
-      button.className = 'px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-red-600 to-red-700 text-white';
-    else if (type === 'Operasional')
-      button.className = 'px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-amber-600 to-amber-700 text-white';
-    else
-      button.className = 'px-6 py-3 rounded-xl font-bold transition-all shadow-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white';
+    button.className = `px-6 py-3 rounded-xl font-bold transition-all shadow-lg ${getChartCategoryMeta(type).buttonClass} text-white`;
   } else {
     button.className = 'px-6 py-3 rounded-xl font-bold transition-all shadow-md bg-gray-200 text-gray-400';
   }
@@ -4163,12 +4200,7 @@ function createChart() {
       borderWidth: 0,
       borderRadius: 8,
       borderSkipped: false,
-      bbackgroundColor:
-  cat === 'Belanja Bahan Baku'
-    ? 'rgba(220, 38, 38, 0.85)'
-    : cat === 'Operasional'
-    ? 'rgba(245, 158, 11, 0.85)'
-    : 'rgba(59, 130, 246, 0.85)',
+      backgroundColor: getChartCategoryMeta(cat).bg,
     });
   });
 
@@ -4236,56 +4268,28 @@ function formatTanggalBackend(dateStr) {
 
     const dateKey = iso.split('T')[0];
     if (!expensesByDate[dateKey]) {
-      expensesByDate[dateKey] = {
-        'Bahan Baku': 0,
-        'Operasional': 0,
-        'Staff': 0
-      };
+      expensesByDate[dateKey] = {};
+      CATEGORIES.forEach(cat => (expensesByDate[dateKey][cat] = 0));
     }
-    expensesByDate[dateKey][exp.category] += exp.amount;
+    if (expensesByDate[dateKey][exp.category] !== undefined) {
+      expensesByDate[dateKey][exp.category] += exp.amount;
+    }
   });
 
 
                 
                 const sortedDates = Object.keys(expensesByDate).sort();
                 
-                const datasets = [];
-                
-                if (chartVisibleData['Bahan Baku']) {
-                    datasets.push({
-                        label: 'Bahan Baku',
-                        data: sortedDates.map(date => expensesByDate[date]['Bahan Baku']),
-                        backgroundColor: 'rgba(220, 38, 38, 0.85)',
-                        borderColor: 'rgb(220, 38, 38)',
+                const datasets = CATEGORIES
+                    .filter(cat => chartVisibleData[cat])
+                    .map(cat => ({
+                        label: cat,
+                        data: sortedDates.map(date => expensesByDate[date][cat] || 0),
+                        backgroundColor: getChartCategoryMeta(cat).bg,
                         borderWidth: 0,
                         borderRadius: 8,
                         borderSkipped: false
-                    });
-                }
-                
-                if (chartVisibleData['Operasional']) {
-                    datasets.push({
-                        label: 'Operasional',
-                        data: sortedDates.map(date => expensesByDate[date]['Operasional']),
-                        backgroundColor: 'rgba(245, 158, 11, 0.85)',
-                        borderColor: 'rgb(245, 158, 11)',
-                        borderWidth: 0,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    });
-                }
-                
-                if (chartVisibleData['Staff']) {
-                    datasets.push({
-                        label: 'Staff',
-                        data: sortedDates.map(date => expensesByDate[date]['Staff']),
-                        backgroundColor: 'rgba(59, 130, 246, 0.85)',
-                        borderColor: 'rgb(59, 130, 246)',
-                        borderWidth: 0,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    });
-                }
+                    }));
                 
                 chartInstance.data.datasets = datasets;
                 chartInstance.update();
