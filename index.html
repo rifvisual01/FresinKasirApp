@@ -7,7 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
- const API_BASE = "https://script.google.com/macros/s/AKfycbyJHdIr6Ab0ZedYocDE363jWkjWtFQzVSv2JI7adaVDIGtGRPFjo_UF3x9X06wb13nL1w/exec";
+ const SUPABASE_URL = "https://bznaicnbztwczckytcdn.supabase.co";
+ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6bmFpY25ienR3Y3pja3l0Y2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMTI2MDMsImV4cCI6MjA5OTY4ODYwM30.Cv1bDv7_ISXjBfuIGMwcA6xmIbBwJA4NEQ3L1zHVxjQ";
+ const SUPABASE_REST = `${SUPABASE_URL}/rest/v1`;
 </script>
   <script src="./kasir-data.js"></script>
 
@@ -599,16 +601,7 @@ updateSyncIndicator();
 
     for (const item of items) {
       try {
-        const fd = new FormData();
-        Object.entries(item.payload).forEach(([k, v]) => {
-          fd.append(k, v);
-        });
-        fd.append('__sync', '1');
-
-        await fetch(API_BASE, {
-          method: 'POST',
-          body: fd
-        });
+        await syncPayloadToSupabase(item.payload);
 
         // hapus setelah terkirim
         await new Promise((resolve, reject) => {
@@ -645,15 +638,7 @@ async function checkRealConnection() {
     // beri waktu lebih panjang
     setTimeout(() => controller.abort(), 8000);
 
-    const fd = new FormData();
-    fd.append('action', 'ping');
-
-    const res = await fetch(API_BASE, {
-      method: 'POST',
-      body: fd,
-      cache: 'no-store',
-      signal: controller.signal
-    });
+    await supabaseRequest('users?select=name&limit=1', { signal: controller.signal });
 
     // jika backend gagal tapi internet ada → tetap online
     return true;
@@ -741,6 +726,168 @@ updateSyncIndicator();
   if (isNaN(d.getTime())) return null;
 
   return d.toISOString();
+}
+
+function supabaseHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+    ...extra
+  };
+}
+
+async function supabaseRequest(path, options = {}) {
+  const res = await fetch(`${SUPABASE_REST}/${path}`, {
+    method: options.method || 'GET',
+    headers: supabaseHeaders(options.headers || {}),
+    body: options.body ? JSON.stringify(options.body) : undefined,
+    cache: 'no-store',
+    signal: options.signal
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Supabase ${res.status}: ${text}`);
+  }
+
+  if (res.status === 204) return null;
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+function dateKeyFromValue(value) {
+  const iso = safeISODate(value);
+  return iso ? iso.split('T')[0] : safeISODate(new Date()).split('T')[0];
+}
+
+function mapExpenseFromDb(row) {
+  const createdAt = row.created_at || row.createdAt || row.timestamp || null;
+  return {
+    id: row.id,
+    tanggal: row.tanggal || dateKeyFromValue(createdAt),
+    shift: row.shift,
+    sessionId: row.session_id || row.sessionId,
+    cashier: row.cashier,
+    expense_name: row.expense_name,
+    category: row.category,
+    amount: Number(row.amount || 0),
+    createdAt,
+    timestamp: createdAt
+  };
+}
+
+function mapShiftFromDb(row) {
+  return {
+    tanggal: row.tanggal || dateKeyFromValue(row.opened_at || row.closed_at),
+    shift: row.shift,
+    cashier: row.cashier,
+    startCash: Number(row.cash_start || 0),
+    endCash: Number(row.cash_end || 0),
+    status: row.status || 'available',
+    openedAt: row.opened_at || null,
+    closedAt: row.closed_at || null,
+    sessionId: row.session_id || row.sessionId
+  };
+}
+
+function deriveShiftDataFromHistory(history) {
+  const today = safeISODate(new Date()).split('T')[0];
+  const next = {
+    shift1: { status: 'available', startCash: 0, endCash: 0, cashier: null },
+    shift2: { status: 'available', startCash: 0, endCash: 0, cashier: null }
+  };
+
+  ['shift1', 'shift2'].forEach(shift => {
+    const records = history
+      .filter(s => s.shift === shift)
+      .sort((a, b) => getShiftSortTime(b) - getShiftSortTime(a));
+    const openRecord = records.find(s => String(s.status).toLowerCase() === 'open');
+    const latest = openRecord || records[0];
+
+    if (!latest) return;
+
+    if (String(latest.status).toLowerCase() === 'open') {
+      next[shift] = { ...latest, status: 'open' };
+      return;
+    }
+
+    if (latest.tanggal === today && String(latest.status).toLowerCase() === 'closed') {
+      next[shift] = { ...latest, status: 'closed' };
+    }
+  });
+
+  return next;
+}
+
+function expenseToDb(expense) {
+  const createdAt = safeISODate(expense.createdAt || expense.timestamp || new Date());
+  return {
+    id: expense.id,
+    tanggal: dateKeyFromValue(createdAt),
+    shift: expense.shift,
+    session_id: expense.sessionId,
+    cashier: expense.cashier,
+    expense_name: expense.expense_name,
+    category: expense.category,
+    amount: Number(expense.amount || 0),
+    created_at: createdAt
+  };
+}
+
+function shiftOpenToDb(payload) {
+  const openedAt = safeISODate(payload.openedAt || new Date());
+  return {
+    tanggal: dateKeyFromValue(openedAt),
+    shift: payload.shift,
+    cashier: payload.cashier,
+    cash_start: Number(payload.startCash || 0),
+    cash_end: null,
+    status: 'open',
+    opened_at: openedAt,
+    closed_at: null,
+    session_id: payload.sessionId
+  };
+}
+
+async function syncPayloadToSupabase(payload) {
+  if (!payload || !payload.action) return;
+
+  if (payload.action === 'loginShift') {
+    await supabaseRequest('shifts?on_conflict=session_id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates' },
+      body: shiftOpenToDb(payload)
+    });
+    return;
+  }
+
+  if (payload.action === 'addExpense') {
+    await supabaseRequest('expenses?on_conflict=id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates' },
+      body: expenseToDb(payload)
+    });
+    return;
+  }
+
+  if (payload.action === 'deleteExpense') {
+    await supabaseRequest(`expenses?id=eq.${encodeURIComponent(payload.id)}`, {
+      method: 'DELETE'
+    });
+    return;
+  }
+
+  if (payload.action === 'closeShift') {
+    await supabaseRequest(`shifts?session_id=eq.${encodeURIComponent(payload.sessionId)}`, {
+      method: 'PATCH',
+      body: {
+        cash_end: Number(payload.endCash || 0),
+        status: 'closed',
+        closed_at: safeISODate(payload.closedAt || new Date())
+      }
+    });
+  }
 }
 
    
@@ -892,42 +1039,30 @@ if (activeShift && !shiftWarningShown) {
    
 async function loadBackendData() {
   if (!navigator.onLine) return;
-  const fd = new FormData();
-  fd.append('action', 'getData');
 
   try {
-    const res = await fetch(API_BASE, {
-      method: 'POST',
-      body: fd
-    });
+    const [expenseRows, shiftRows, userRows] = await Promise.all([
+      supabaseRequest('expenses?select=*&order=created_at.desc&limit=10000'),
+      supabaseRequest('shifts?select=*&order=opened_at.desc&limit=10000'),
+      supabaseRequest('users?select=*&order=name.asc')
+    ]);
 
-    const json = await res.json();
+    if (currentView !== 'admin') {
+      expenses = (expenseRows || []).map(mapExpenseFromDb);
+    }
 
-    if (json.success) {
+    cashiers = (userRows || []).map(u => ({
+      name: u.name,
+      pin: String(u.pin || ''),
+      role: u.role || 'kasir',
+      active: u.active !== false
+    }));
 
-  // 🔒 JANGAN TIMPA expenses SAAT MODE ADMIN
-  if (currentView !== 'admin') {
-    expenses = json.data.expenses || [];
-  }
+    shiftHistory = (shiftRows || []).map(mapShiftFromDb);
+    shiftData = deriveShiftDataFromHistory(shiftHistory);
 
-  cashiers = json.data.cashiers || [];
-  if (navigator.onLine && json.data.shiftHistory) {
-  shiftHistory = json.data.shiftHistory;
-}
-
-if (navigator.onLine && json.data.shiftData) {
-  shiftData = json.data.shiftData;
-}
-
-   // 🔥 AUTO RESTORE SHIFT
-const restored = restoreOpenShift();
-
-// 🔥 JANGAN AUTO MASUK SHIFT
-// kita hanya tandai saja
-let activeShiftDetected = restored;
-     
-  renderCurrentView(); // update UI tanpa reload
-}
+    restoreOpenShift();
+    renderCurrentView();
   } catch (err) {
     console.error('Backend load failed', err);
   }
@@ -1799,26 +1934,13 @@ const lastShift1 = shiftHistory
    async function loadAllExpensesForAdmin() {
   if (!navigator.onLine) return;
   try {
-    const fd = new FormData();
-    fd.append('action', 'getAllExpenses');
-
-    const res = await fetch(API_BASE, {
-      method: 'POST',
-      body: fd
-    });
-
-    const json = await res.json();
-    if (!json.success) return;
-
-    expenses = (json.data || []).map(e => ({
-      ...e,
-      createdAt: e.createdAt || e.timestamp || null
-    }));
-
+    const data = await supabaseRequest('expenses?select=*&order=created_at.desc&limit=10000');
+    expenses = (data || []).map(mapExpenseFromDb);
   } catch (err) {
-    console.error('❌ Gagal load expenses admin', err);
+    console.error('Gagal load expenses admin', err);
   }
 }
+
 
 
 function renderAdminDeleteButton(exp) {
@@ -3016,16 +3138,6 @@ shiftData.admin = {
   showNotification(`Selamat datang, ${admin.name}`, 'success');
   resetBtn();
 
-  // BACKEND FIRE & FORGET
-  if (navigator.onLine) {
-    const fd = new FormData();
-    fd.append('action', 'loginAdmin');
-    fd.append('pin', pin);
-    fd.append('__sync', '1');
-
-    fetch(API_BASE, { method: 'POST', body: fd }).catch(() => {});
-  }
-
   function resetBtn() {
     btn.textContent = originalText;
     btn.disabled = false;
@@ -3218,7 +3330,8 @@ localStorage.setItem('activeShift', JSON.stringify({
         cashier: cashierName,
         pin,
         startCash,
-        sessionId // 🔑 KIRIM SESSION
+        sessionId,
+        openedAt: shiftData[shift].openedAt
       }
     });
 
@@ -3251,26 +3364,16 @@ localStorage.setItem('activeShift', JSON.stringify({
 
   renderCurrentView();
 
-  // backend sinkron
-  const fd = new FormData();
-  fd.append('action', 'loginShift');
-  fd.append('pin', pin);
-  fd.append('shift', shift);
-  fd.append('cashier', cashierName);
-  fd.append('startCash', startCash);
-  fd.append('sessionId', sessionId); // 🔑 KIRIM SESSION
-  fd.append('__sync', '1');
-
   try {
-    const res = await fetch(API_BASE, { method: 'POST', body: fd });
-    const json = await res.json();
-
-    if (!json.success) {
-      showNotification(
-        json.message || 'Sinkronisasi login gagal',
-        'warning'
-      );
-    }
+    await syncPayloadToSupabase({
+      action: 'loginShift',
+      shift,
+      cashier: cashierName,
+      pin,
+      startCash,
+      sessionId,
+      openedAt: shiftData[shift].openedAt
+    });
   } catch (err) {
     // fallback ke queue
     await saveToQueue({
@@ -3281,7 +3384,8 @@ localStorage.setItem('activeShift', JSON.stringify({
         cashier: cashierName,
         pin,
         startCash,
-        sessionId // 🔑 KIRIM SESSION
+        sessionId,
+        openedAt: shiftData[shift].openedAt
       }
     });
 
@@ -3733,26 +3837,10 @@ localStorage.removeItem('activeShift');
   }
 
   // ================================
-  // 4️⃣ ONLINE → BACKEND
+  // 4?????? ONLINE ??? SUPABASE
   // ================================
-  const fd = new FormData();
-  Object.entries(payload).forEach(([k, v]) => fd.append(k, v));
-  fd.append('__sync', '1');
-
   try {
-    const res = await fetch(API_BASE, {
-      method: 'POST',
-      body: fd
-    });
-
-    const json = await res.json();
-
-    if (!json.success) {
-      showNotification(
-        json.message || 'Sinkronisasi tutup shift gagal',
-        'warning'
-      );
-    }
+    await syncPayloadToSupabase(payload);
   } catch (err) {
     // fallback ke queue
     await saveToQueue({
